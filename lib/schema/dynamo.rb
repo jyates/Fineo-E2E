@@ -8,6 +8,8 @@ class Dynamo
 
   include Params
 
+  attr_accessor :port
+
   def start
     dynamo = File.join(Params::WORKING_DIR, "dynamo")
     Dir.mkdir(dynamo)
