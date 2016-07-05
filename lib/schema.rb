@@ -1,11 +1,14 @@
 
 require 'schema/dynamo'
 require 'util/params'
+require 'util/run'
 require 'json'
 
 class Schema
 
-   E2E = "io.fineo.lambda.handle.schema.e2e.EndtoEndWrapper"
+  E2E = "io.fineo.lambda.handle.schema.e2e.EndtoEndWrapper"
+
+  include Run
 
   def initialize
     @home = ENV['SCHEMA_HOME']
@@ -15,6 +18,7 @@ class Schema
 
   def start_store
     @dynamo.start
+    @store_table = "schema-table_test-#{Random.rand(100000)}"
   end
 
   # use the schema store java to create a schema at a location
@@ -66,13 +70,11 @@ private
       jars = Dir.entries(@home).delete_if{|file| !file.end_with?("aws.jar")}
       jars.map! {|jar| File.join(absolute, jar)}
 
-      debug = "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y"
-      #debug = ""
-      cmd = "java #{debug} -cp #{jars.join(':')} #{E2E} --json #{out} --host localhost --port #{@dynamo.port} #{cmd}"
-      puts "Running: #{cmd}"
-      `#{cmd}`
-      raise "Could not run '#{cmd}' with request: #{request}!" unless $? == 0
+      java(jars, E2E,
+        {"--json" => out,
+        "--host" => "localhost",
+        "--port" => @dynamo.port,
+        "--schema-table" => @store_table},
+         cmd)
     end
-
-
 end
