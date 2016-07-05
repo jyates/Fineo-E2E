@@ -2,7 +2,8 @@
 require 'schema/dynamo'
 require 'util/params'
 require 'util/run'
-require 'json'
+require 'util/json_helper'
+require 'util/javajars'
 
 class Schema
 
@@ -52,23 +53,11 @@ private
     def schema_run(dir, cmd, request)
       dir = File.absolute_path(dir)
       # write the request to a json file
-      ending = 0
-      out = File.join(dir, "#{cmd}.json")
-      # find a new ending for the command request file
-      while(File.exists?(out)) do
-          ending = ending +1
-          out = out+ending
-      end
-
-      Dir.mkdir dir unless Dir.exists? dir
-      File.open(out,"w") do |f|
-        f.write(request.to_json)
-      end
+      out = JsonHelper.write(dir, cmd, request)
 
       # run the request against the deployable e2e jars
       absolute = File.absolute_path(@home)
-      jars = Dir.entries(@home).delete_if{|file| !file.end_with?("aws.jar")}
-      jars.map! {|jar| File.join(absolute, jar)}
+      jars = JavaJars.find_aws_jars(absolute)
 
       java(jars, E2E,
         {"--json" => out,
