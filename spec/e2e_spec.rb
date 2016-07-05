@@ -20,8 +20,8 @@ RSpec.describe E2E, "#start" do
     metric_id = "metric1"
     schema = {
       "field1" =>{
-        "alias" => [],
-        "type" => "BOOLEAN"
+        "aliases" => [],
+        "fieldType" => "BOOLEAN"
       }
     }
     event = {
