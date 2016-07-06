@@ -23,11 +23,13 @@ class Dynamo
     @pid = spawn("#{cmd}", :out => "#{out}", :err => "#{err}")
     Process.detach(@pid)
     raise "Dynamo didn't start correctly! See #{err} for more info" unless wait_for_dynamo(out, err)
+    @started = true
 
     puts "(#{@pid}) Running dynamo from #{dynamo}. Output/errors are logged to that directory"
   end
 
   def cleanup
+    return unless @started
     puts "Stopping local Dynamo(#{@pid})"
     system("kill -9 #{@pid}")
   end

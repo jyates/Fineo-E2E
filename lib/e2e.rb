@@ -1,18 +1,24 @@
 # Main entry point for running the E2E testing
 
 require 'util/params'
-require 'dynamo'
-require 'schema'
-require 'ingest'
-require 'spark'
-require 'drill'
+
+require 'resources/dynamo'
+require 'resources/spark'
+
+require 'components/schema'
+require 'components/ingest'
+require 'components/batch'
+require 'components/drill'
 
 class E2E
 
   def initialize
     @dynamo = Dynamo.new
+    @spark = Spark.new
+
     @schema = Schema.new
     @ingest = Ingest.new
+    @batch = Batch.new
     @drill = Drill.new
 
     ensure_working_dir
@@ -39,7 +45,8 @@ class E2E
 
   # Do the batch processing step from the output file via spark
   def batch_process
-    @output = @spark.process(@firehose)
+    # @spark.start
+    @output = @batch.process(@base_opts.clone, @firehose, nil)
   end
 
   def read(org, metric)
@@ -47,6 +54,7 @@ class E2E
   end
 
   def cleanup
+    @spark.stop
     @dynamo.cleanup
   end
 end

@@ -26,7 +26,7 @@ class Ingest
     options["--ingest-table-prefix"] = @store_prefix
     options["--firehose-output"] = output
 
-    ENV['DEBUG']="jesse"
+    #ENV['DEBUG']="jesse"
     java(jars, INGEST, options, "local")
     output
   end
