@@ -1,5 +1,4 @@
 
-require 'schema/dynamo'
 require 'util/params'
 require 'util/run'
 require 'util/json_helper'
@@ -10,15 +9,14 @@ class Schema
   E2E = "io.fineo.lambda.handle.schema.e2e.EndtoEndWrapper"
 
   include Run
+  attr_reader :store_table
 
   def initialize
-    @home = ENV['SCHEMA_HOME']
-    raise "SCHEMA_HOME not defined in environment variables - it must be!" unless !@home.nil?
-    @dynamo = Dynamo.new
+    @home = Params.env_require 'SCHEMA_HOME'
   end
 
-  def start_store
-    @dynamo.start
+  def start_store(dynamo)
+    @dynamo = dynamo
     @store_table = "schema-table_test-#{Random.rand(100000)}"
   end
 
@@ -44,8 +42,10 @@ class Schema
     }
   end
 
-  def cleanup
-    @dynamo.cleanup
+  def base_opts
+     {"--host" => "localhost",
+      "--port" => @dynamo.port,
+      "--schema-table" => @store_table}
   end
 
 private
@@ -59,11 +59,8 @@ private
       absolute = File.absolute_path(@home)
       jars = JavaJars.find_aws_jars(absolute)
 
-      java(jars, E2E,
-        {"--json" => out,
-        "--host" => "localhost",
-        "--port" => @dynamo.port,
-        "--schema-table" => @store_table},
-         cmd)
+      opts = base_opts
+      opts["--json"] = out
+      java(jars, E2E, opts, cmd)
     end
 end

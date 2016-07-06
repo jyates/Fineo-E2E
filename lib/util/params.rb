@@ -7,6 +7,11 @@ module Params
     a
   end
 
-  WORKING_DIR = env('WORKING_DIR', 'tmp/')
+  def self.env_require(str)
+    a = ENV[str]
+    raise "#{str} not defined in environment variables - it must be!" unless !a.nil?
+    return a
+  end
 
+  WORKING_DIR = env('WORKING_DIR', 'tmp/')
 end
