@@ -1,10 +1,11 @@
 
+require 'components/base_component'
 require 'util/params'
 require 'util/run'
 require 'util/json_helper'
 require 'util/javajars'
 
-class Schema
+class Schema < BaseComponent
 
   E2E = "io.fineo.lambda.handle.schema.e2e.EndtoEndWrapper"
 
@@ -12,7 +13,7 @@ class Schema
   attr_reader :store_table
 
   def initialize
-    @home = Params.env_require 'SCHEMA_HOME'
+    super('SCHEMA_HOME')
   end
 
   def start_store(dynamo)
@@ -22,7 +23,7 @@ class Schema
 
   # use the schema store java to create a schema at a location
   def create(org, metric, fields)
-    schema_dir = File.join(Params::WORKING_DIR, "schema")
+    schema_dir = setup_dir("schema")
 
     request = { "orgId" => org}
     schema_run schema_dir, "createOrg", request
@@ -55,12 +56,8 @@ private
       # write the request to a json file
       out = JsonHelper.write(dir, cmd, request)
 
-      # run the request against the deployable e2e jars
-      absolute = File.absolute_path(@home)
-      jars = JavaJars.find_aws_jars(absolute)
-
       opts = base_opts
       opts["--json"] = out
-      java(jars, E2E, opts, cmd)
+      java(aws_jars(), E2E, opts, cmd)
     end
 end

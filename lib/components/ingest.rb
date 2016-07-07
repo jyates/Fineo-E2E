@@ -1,33 +1,31 @@
 
-require 'util/params'
+require 'components/base_component'
 require 'util/json_helper'
-require 'util/javajars'
 require 'util/run'
 
-class Ingest
+class Ingest < BaseComponent
 
   INGEST = "io.fineo.stream.processing.e2e.EndToEndWrapper"
   include Run
 
   def initialize
-    @home = Params.env_require 'INGEST_WRITE_HOME'
+    super('INGEST_WRITE_HOME')
     @store_prefix = "ingest-e2e_test-#{Random.rand(100000)}"
   end
 
   def send(options, org_id, user_metric_name, event_hash)
-    file_dir = File.join(Params::WORKING_DIR, "events")
+    file_dir = setup_dir("events")
     file = JsonHelper.write(file_dir, "event", event_hash)
-
-    output = File.join(file_dir, "output.avro")
-    absolute = File.absolute_path(@home)
-    jars = JavaJars.find_aws_jars(absolute)
-
     options["--json"] = File.absolute_path(file)
+
     options["--ingest-table-prefix"] = @store_prefix
+
+    output_dir = File.join(file_dir, "output")
+    Dir.mkdir output_dir
+    output = File.join(output_dir, "output.avro")
     options["--firehose-output"] = output
 
-    #ENV['DEBUG']="jesse"
-    java(jars, INGEST, options, "local")
-    output
+    java(aws_jars(), INGEST, options, "local")
+    output_dir
   end
 end

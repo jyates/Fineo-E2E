@@ -45,8 +45,8 @@ class E2E
 
   # Do the batch processing step from the output file via spark
   def batch_process
-    # @spark.start
-    @output = @batch.process(@base_opts.clone, @firehose, nil)
+    @spark.start
+    @output = @batch.process(@base_opts.clone, @firehose, @spark)
   end
 
   def read(org, metric)

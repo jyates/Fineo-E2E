@@ -1,7 +1,9 @@
 
-class Drill
+require 'components/base_component'
+
+class Drill < BaseComponent
   def initialize
-    @home = ENV['DRILL_READ_HOME']
+    super('DRILL_READ_HOME')
   end
 
 end

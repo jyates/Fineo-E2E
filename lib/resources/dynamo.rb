@@ -25,7 +25,7 @@ class Dynamo
     raise "Dynamo didn't start correctly! See #{err} for more info" unless wait_for_dynamo(out, err)
     @started = true
 
-    puts "(#{@pid}) Running dynamo from #{dynamo}. Output/errors are logged to that directory"
+    puts "(#{@pid}) Running dynamo from #{dynamo}. Output/errors is logged to that directory"
   end
 
   def cleanup
