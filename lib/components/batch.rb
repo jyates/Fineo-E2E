@@ -5,7 +5,6 @@ require 'components/base_component'
 # Run a spark batch processing job
 class Batch < BaseComponent
 
-  include Run
   JOB = "io.fineo.etl.spark.SparkETL"
   BATCH = "io.fineo.batch.processing.e2e.SparkE2ETestRunner"
 

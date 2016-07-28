@@ -6,7 +6,8 @@ require 'util/run'
 class Ingest < BaseComponent
 
   INGEST = "io.fineo.stream.processing.e2e.EndToEndWrapper"
-  include Run
+
+  attr_reader :store_prefix
 
   def initialize
     super('INGEST_WRITE_HOME')

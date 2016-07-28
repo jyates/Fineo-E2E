@@ -30,8 +30,12 @@ module Run
     cmd.concat " #{Command.spaces(cmd_opts)}" unless cmd_opts.empty?
     command.concat "#{cmd} >> tmp/out.log 2>> tmp/error.log"
 
+    log_class_start(clazz)
+    run command
+  end
+
+  def log_class_start(clazz)
     run("echo ---- #{clazz} ----- >> tmp/out.log ", false)
     run("echo ---- #{clazz} ----- >> tmp/error.log ", false)
-    run command
   end
 end

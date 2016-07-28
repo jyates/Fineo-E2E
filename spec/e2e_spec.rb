@@ -13,12 +13,13 @@ RSpec.describe E2E, "#start" do
       @e2e.cleanup
     end
 
-    it "ingests and writes on row" do
+    it "ingests, batch processes and reads a row" do
       @e2e.start_store
 
       # setup the event we want to send
       org_id = "org1"
       metric_id = "metric1"
+
       schema = {
         "field1" =>{
           "aliases" => [],
@@ -35,11 +36,21 @@ RSpec.describe E2E, "#start" do
       }
       @e2e.send_event(org_id, metric_id, event)
 
+      # read from dynamo
+      validate(event, @e2e.read_dynamo(org_id, metric_id), "dynamo")
+
       # convert to parquet and correct directory structure
       @e2e.batch_process
 
-      events = @e2e.read(org_id, metric_id, event)
-      assert_equals([event], events, "Didn't read the right event from the underlying files!")
+      # read from parquet
+      validate(event, @e2e.read_parquet(org_id, metric_id), "the underlying files")
+
+      # read from 'both', but really just dynamo b/c we filter out older parquet files
+      validate(event, @e2e.read_all(org_id, metric_id), '"both" dynamo and parquet')
+    end
+
+    def validate(event, events, source)
+      assert_equals([event], events, "Didn't read the right event from #{source}!")
     end
   end
 end

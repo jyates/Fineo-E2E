@@ -9,7 +9,6 @@ class Schema < BaseComponent
 
   E2E = "io.fineo.lambda.handle.schema.e2e.EndtoEndWrapper"
 
-  include Run
   attr_reader :store_table
 
   def initialize

@@ -3,6 +3,7 @@ require 'util/javajars'
 require 'util/params'
 
 class BaseComponent
+  include Run
 
   def initialize(home_env)
     @home = Params.env_require home_env

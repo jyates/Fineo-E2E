@@ -10,6 +10,8 @@ require 'components/ingest'
 require 'components/batch'
 require 'components/drill'
 
+require 'json'
+
 class E2E
 
   def initialize
@@ -49,12 +51,30 @@ class E2E
     @output = @batch.process(@base_opts.clone, @firehose, @spark)
   end
 
-  def read(org, metric)
-    @drill.read(org, metric).from(@output)
+  def read_dynamo(org, metric)
+    read_drill(Drill::DYNAMO, org, metric)
+  end
+
+  def read_parquet(org, metric)
+    read_parquet(Drill::PARQUET, org, metric)
+  end
+
+  def read_all(org, metric)
+    read_drill(Drill::BOTH, org, metric)
   end
 
   def cleanup
     @spark.stop
     @dynamo.cleanup
   end
+
+private
+
+  def read_drill(mode, org, metric)
+    read = @drill.read(@base_opts.clone, mode, org, metric, @output, @ingest.store_prefix)
+    #read the data
+    file = File.read(drill_read)
+    JSON.parse(file)
+  end
+
 end

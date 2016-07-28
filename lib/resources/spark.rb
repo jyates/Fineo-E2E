@@ -32,7 +32,8 @@ class Spark
     cmd.concat " #{jar}"
 
     cmd.concat " #{Command.spaces(args_hash)}"
-    run("echo ---- SPARK: #{clazz} ----- >> tmp/out.log", false)
+    cmd.concat " >> tmp/out.log 2>> tmp/error.log"
+    log_class_start(clazz)
     run cmd
   end
 
