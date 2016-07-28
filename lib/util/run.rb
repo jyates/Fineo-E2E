@@ -4,6 +4,10 @@ require "util/command"
 
 module Run
 
+  def enableDebuggingForTesting()
+    ENV['DEBUG'] = "1"
+  end
+
   def run(command, log=true)
      puts "Running: #{command}" if log
      `#{command}`
@@ -15,6 +19,7 @@ module Run
     command = "java "
 
     unless Params.env('DEBUG', '').empty?
+      puts " ------- Please connect remotely to JVM -------- "
       command.concat "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y "
     end
 
