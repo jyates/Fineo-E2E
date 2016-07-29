@@ -43,7 +43,6 @@ class Drill < BaseComponent
     opts["--org"] = org
     opts["--metric"] = metric
 
-    ENV['DEBUG'] = "1"
     java(aws_jars(), DRILL, opts, "local")
     file
   end

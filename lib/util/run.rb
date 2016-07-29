@@ -6,6 +6,7 @@ module Run
 
   def enableDebuggingForTesting()
     ENV['DEBUG'] = "1"
+    ENV['DISABLE_DEBUG_AFTER'] = "1"
   end
 
   def run(command, log=true)
@@ -36,7 +37,9 @@ module Run
     command.concat "#{cmd} >> tmp/out.log 2>> tmp/error.log"
 
     log_class_start(clazz)
-    run command
+    result = run command
+    ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
+    return result
   end
 
   def log_class_start(clazz)
