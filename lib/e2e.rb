@@ -56,7 +56,7 @@ class E2E
   end
 
   def read_parquet(org, metric)
-    read_parquet(Drill::PARQUET, org, metric)
+    read_drill(Drill::PARQUET, org, metric)
   end
 
   def read_all(org, metric)
