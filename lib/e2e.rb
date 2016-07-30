@@ -11,6 +11,7 @@ require 'components/batch'
 require 'components/drill'
 
 require 'json'
+require 'util/run'
 
 class E2E
 

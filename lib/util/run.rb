@@ -4,7 +4,7 @@ require "util/command"
 
 module Run
 
-  def enableDebuggingForTesting()
+  def self.enableDebuggingForTesting()
     ENV['DEBUG'] = "1"
     ENV['DISABLE_DEBUG_AFTER'] = "1"
   end
