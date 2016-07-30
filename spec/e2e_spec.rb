@@ -33,7 +33,8 @@ RSpec.describe E2E, "#start" do
       event = {
         "companykey" => org_id,
         "metrictype" => metric_id,
-        "timestamp" => 1234,
+        # 1980, so we fit within Drill's epoch
+        "timestamp" => 315532800000,
         "field1" => true
       }
       @e2e.send_event(org_id, metric_id, event)
