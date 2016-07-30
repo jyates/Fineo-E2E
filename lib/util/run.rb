@@ -20,7 +20,7 @@ module Run
     command = "java "
 
     unless Params.env('DEBUG', '').empty?
-      puts " ------- Please connect remotely to JVM -------- "
+      puts " ------- Please connect to remote JVM at:  -------- "
       command.concat "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y "
     end
 

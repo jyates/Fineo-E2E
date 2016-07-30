@@ -72,8 +72,8 @@ private
 
   def read_drill(mode, org, metric)
     read = @drill.read(@base_opts.clone, mode, org, metric, @output, @ingest.store_prefix)
-    #read the data
-    file = File.read(drill_read)
+    # read the data
+    file = File.read(read)
     JSON.parse(file)
   end
 

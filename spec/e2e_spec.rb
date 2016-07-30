@@ -1,6 +1,7 @@
 # Rspec based file for running end-to-end testing of the Fineo infrastructure
 
 require 'e2e'
+require 'spec_helper'
 
 RSpec.describe E2E, "#start" do
   context "with a local e2e setup" do
@@ -13,6 +14,7 @@ RSpec.describe E2E, "#start" do
       @e2e.cleanup
     end
 
+    # TODO Switch to using a context and nested 'it' states
     it "ingests, batch processes and reads a row" do
       @e2e.start_store
 
@@ -36,6 +38,10 @@ RSpec.describe E2E, "#start" do
       }
       @e2e.send_event(org_id, metric_id, event)
 
+      # cleanup the event for what we actually exepct to read back
+      event.delete("companykey")
+      event.delete("metrictype")
+
       # read from dynamo
       validate(event, @e2e.read_dynamo(org_id, metric_id), "dynamo")
 
@@ -50,7 +56,7 @@ RSpec.describe E2E, "#start" do
     end
 
     def validate(event, events, source)
-      assert_equals([event], events, "Didn't read the right event from #{source}!")
+      expect([event]).to eq events
     end
   end
 end
