@@ -2,6 +2,7 @@
 
 require 'e2e'
 require 'spec_helper'
+require 'util/run'
 
 RSpec.describe E2E, "#start" do
   context "with a local e2e setup" do
@@ -50,6 +51,7 @@ RSpec.describe E2E, "#start" do
       @e2e.batch_process
 
       # read from parquet
+      Run.enableDebugging
       validate(event, @e2e.read_parquet(org_id, metric_id), "the underlying files")
 
       # read from 'both', but really just dynamo b/c we filter out older parquet files

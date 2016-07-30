@@ -4,7 +4,8 @@ require "util/command"
 
 module Run
 
-  def self.enableDebuggingForTesting()
+  DEBUG_PORT = 5005
+  def self.enableDebugging()
     ENV['DEBUG'] = "1"
     ENV['DISABLE_DEBUG_AFTER'] = "1"
   end
@@ -19,9 +20,10 @@ module Run
   def java(jars_list, clazz, args_hash, cmd, cmd_opts={})
     command = "java "
 
+
     unless Params.env('DEBUG', '').empty?
-      puts " ------- Please connect to remote JVM at:  -------- "
-      command.concat "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=5005,suspend=y "
+      puts " ------- Please connect to remote JVM at: #{DEBUG_PORT} -------- "
+      command.concat "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=#{DEBUG_PORT},suspend=y "
     end
 
     jars = jars_list.join(':')
