@@ -9,6 +9,7 @@ class Resource
   end
 
   def unpack
+    puts "Unpacking #{@source} into #{@working}"
     Dir.mkdir(@working)
     ret = system("tar -xf #{@source} -C #{@working}")
     raise("Could not unpack resource #{@source} => #{@working}") unless ret
