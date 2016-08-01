@@ -45,12 +45,13 @@ class Spark < Resource
     # need MASTER_IP to ensure that slave and master can connect
     @sbin = "SPARK_MASTER_IP=#{@hostname} #{@dir}/sbin"
     run('echo "--- Starting Spark -----" >> tmp/out.log', false)
-    run "#{@sbin}/start-all.sh #{Run::LOG} "
+    run "#{@sbin}/start-master.sh #{Run::LOG}"
+    run "#{@sbin}/start-slave.sh spark://#{@hostname}:#{@port} #{Run::LOG}"
     @started = true
   end
 
   def stop
     return unless @started
-    run "#{@sbin}/stop-all.sh"
+    run "#{@sbin}/stop-all.sh #{Run::LOG}"
   end
 end

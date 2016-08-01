@@ -69,6 +69,10 @@ class E2E
     @dynamo.cleanup
   end
 
+  def start_spark
+    @spark.start
+  end
+
 private
 
   def read_drill(mode, org, metric)
