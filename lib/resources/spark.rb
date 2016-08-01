@@ -44,7 +44,8 @@ class Spark < Resource
     @dir = "#{@working}/spark-1.6.2-bin-hadoop2.6"
     # need MASTER_IP to ensure that slave and master can connect
     @sbin = "SPARK_MASTER_IP=#{@hostname} #{@dir}/sbin"
-    run "#{@sbin}/start-all.sh"
+    run('echo "--- Starting Spark -----" >> tmp/out.log', false)
+    run "#{@sbin}/start-all.sh #{Run::LOG} "
     @started = true
   end
 

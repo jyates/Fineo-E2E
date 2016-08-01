@@ -4,7 +4,9 @@ require "util/command"
 
 module Run
 
+  LOG = ">> tmp/out.log 2>> tmp/error.log"
   DEBUG_PORT = 5005
+
   def self.enableDebugging()
     ENV['DEBUG'] = "1"
     ENV['DISABLE_DEBUG_AFTER'] = "1"
@@ -36,7 +38,7 @@ module Run
     command.concat "#{args} "
 
     cmd.concat " #{Command.spaces(cmd_opts)}" unless cmd_opts.empty?
-    command.concat "#{cmd} >> tmp/out.log 2>> tmp/error.log"
+    command.concat "#{cmd} #{LOG}"
 
     log_class_start(clazz)
     result = run command
