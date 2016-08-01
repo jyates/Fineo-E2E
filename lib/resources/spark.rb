@@ -13,13 +13,14 @@ class Spark < Resource
     super('spark.tar.gz', "spark")
     # default port for spark master
     @port = 7077
+    @hostname = `hostname`.strip
   end
 
   # invokes the spark-submit script
   def submit(jars, clazz, args_hash)
     # basic command
     cmd = "#{@dir}/bin/spark-submit --class #{clazz}" \
-      + " --master spark://localhost:#{@port}"
+      + " --master spark://#{@hostname}:#{@port}"
       # local mode will fail the test if the job fails and log output to console... easier for now
       #+ " --deploy-mode cluster"
 
