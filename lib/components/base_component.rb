@@ -6,7 +6,7 @@ class BaseComponent
   include Run
 
   def initialize(home_env)
-    @home = Params.env_require home_env
+    @home = (Params.env_require home_env)+"/target"
   end
 
   def setup_dir(leaf_name)
