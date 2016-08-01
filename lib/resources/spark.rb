@@ -2,15 +2,15 @@
 require 'util/params'
 require 'util/run'
 require 'util/command'
-
+require 'resources/base_resource'
 # Manage a local spark cluster
-class Spark
-  SPARK_IN = 'ext/spark.tar.gz'
 
+class Spark < Resource
   include Params
   include Run
 
   def initialize
+    super('spark.tar.gz', "spark")
     # default port for spark master
     @port = 7077
   end
@@ -38,14 +38,9 @@ class Spark
   end
 
   def start
-    # Create working directory
-    dir = File.join(Params::WORKING_DIR, "spark")
-    Dir.mkdir(dir)
-    ret = system("tar -xf #{SPARK_IN} -C #{dir}")
-    raise("Could not unpack dynamo #{SPARK_IN} => #{dir}") unless ret
-
+    unpack
     # start the cluster
-    @dir = "#{dir}/spark-1.6.2-bin-hadoop2.6"
+    @dir = "#{@working}/spark-1.6.2-bin-hadoop2.6"
     @sbin = "#{@dir}/sbin"
     run "#{@sbin}/start-all.sh"
     @started = true
