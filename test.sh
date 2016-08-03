@@ -10,4 +10,8 @@ export INGEST_WRITE_HOME=${INGEST_WRITE_HOME:-../ingest/pipeline/stream-processi
 export BATCH_ETL_HOME=${BATCH_ETL_HOME:-../ingest/batch-parent/batch-etl-e2e}
 export DRILL_READ_HOME=${DRILL_READ_HOME:-../readerator/e2e-testing}
 
-bin/rspec --format doc
+# You can also just pass through arguments to rspec. In particular, its likely the "--tag" 
+# option will be helpful. For instance, to just run the  local tests you would do:
+# ./test.sh --tag mode:local
+
+bin/rspec --format doc $@
