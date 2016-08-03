@@ -33,7 +33,7 @@ class Spark < Resource
     cmd.concat " #{jar}"
 
     cmd.concat " #{Command.spaces(args_hash)}"
-    cmd.concat " >> tmp/out.log 2>> tmp/error.log"
+    cmd.concat log?
     log_class_start(clazz)
     run cmd
   end
@@ -45,13 +45,17 @@ class Spark < Resource
     # need MASTER_IP to ensure that slave and master can connect
     @sbin = "SPARK_MASTER_IP=#{@hostname} #{@dir}/sbin"
     run('echo "--- Starting Spark -----" >> tmp/out.log', false)
-    run "#{@sbin}/start-master.sh #{Run::LOG}"
-    run "#{@sbin}/start-slave.sh spark://#{@hostname}:#{@port} #{Run::LOG}"
+    run "#{@sbin}/start-master.sh #{log?()}"
+    run "#{@sbin}/start-slave.sh spark://#{@hostname}:#{@port} #{log?()}"
     @started = true
   end
 
   def stop
     return unless @started
     run "#{@sbin}/stop-all.sh #{Run::LOG}"
+  end
+
+  def log?
+    " >> #{@working}/out.log 2>> #{@working}/error.log"
   end
 end

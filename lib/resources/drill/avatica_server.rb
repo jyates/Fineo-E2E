@@ -30,6 +30,10 @@ class AvaticaServer < BaseComponent
     Process.detach(@pid)
   end
 
+  def connect_string?
+    "jdbc:avatica:remote:serialization=protobuf;url=#{@hostname}:#{@port}"
+  end
+
   def stop
     run "kill -9 #{@pid}"
   end

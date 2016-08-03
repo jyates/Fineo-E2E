@@ -20,7 +20,7 @@ class E2EState
     @schema = Schema.new
     @ingest = Ingest.new
     @batch = Batch.new
-    @drill = Drill.new
+    @drill = @drill_cluster.drill_component?
   end
 
   def base_opts

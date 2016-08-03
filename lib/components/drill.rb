@@ -1,4 +1,5 @@
 
+require 'ostruct'
 require 'components/base_component'
 
 class Drill < BaseComponent
@@ -19,31 +20,23 @@ class Drill < BaseComponent
 
   DRILL = "io.fineo.read.drill.e2e.EndToEndWrapper"
 
-  def initialize
-    super('DRILL_READ_HOME')
-  end
-
-  class CallContext
-    attr_reader :opts, :org, :metric, :batch, :prefix, :dir
-    def initialize(opts, org, metric, batch, prefix, dir)
-      @opts = opts
-      @org = org
-      @metric = metric
-      @batch = batch
-      @prefix = prefix
-      @dir = dir
-    end
+  def initialize(home, addtl_opts={}, command)
+    super(home)
+    @addtl_opts = addtl_opts
+    @command = command
   end
 
   def read(opts, mode, org, metric, batch_output_dir, dynamo_table_prefix)
     file_dir = setup_dir("drill_read")
-    context = CallContext.new(opts, org, metric, batch_output_dir, dynamo_table_prefix, file_dir)
+    context = OpenStruct.new(:opts => opts, :org => org, :metric => metric,
+      :batch => batch_output_dir, :prefix => dynamo_table_prefix, :dir => file_dir)
     file = mode.call(context)
     opts["--output"] = file
     opts["--org"] = org
     opts["--metric"] = metric
 
-    java(aws_jars(), DRILL, opts, "local")
+    java(aws_jars(), DRILL, opts.merge(@addtl_opts), @command)
     file
   end
+
 end

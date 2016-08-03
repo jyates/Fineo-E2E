@@ -4,6 +4,7 @@ require 'e2e/state'
 require 'resources/dynamo'
 require 'resources/spark'
 require 'resources/drill'
+require 'resources/drill/base'
 
 class E2ERunner
 
@@ -16,17 +17,9 @@ class E2ERunner
   def drill!(mode)
     case mode
       when "local"
-        clazz = Class.new do
-            # fake Drill resource - local mode handles everything itself
-            def start
-            end
-
-            def stop
-            end
-        end
-        @drill = clazz.new
+        @drill = BaseDrill.new
       when "standalone"
-        @drill = DrillResource
+        @drill = DrillResource.new
     end
   end
 
