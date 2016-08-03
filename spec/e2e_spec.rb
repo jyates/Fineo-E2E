@@ -1,64 +1,66 @@
 # Rspec based file for running end-to-end testing of the Fineo infrastructure
 
-require 'e2e'
-require 'spec_helper'
+require 'e2e/runner'
 require 'util/run'
+require 'spec_helper'
 
-RSpec.describe E2E, "#start" do
+RSpec.describe E2ERunner, "#start" do
   context "with a local e2e setup" do
     before(:each) do
-      @e2e = E2E.new
+      @e2e = E2ERunner.new
     end
 
     after(:each) do
       puts "=== Cleanup ==="
       @e2e.cleanup
     end
+    
+    ORG_ID = "org1"
+    METRIC_NAME = "metric1"
 
-    # TODO Switch to using a context and nested 'it' states
-    it "ingests, batch processes and reads a row" do
-      @e2e.start_store
-
-      # setup the event we want to send
-      org_id = "org1"
-      metric_id = "metric1"
-
-      schema = {
-        "field1" =>{
-          "aliases" => [],
-          "fieldType" => "BOOLEAN"
-        }
-      }
-      @e2e.create_schema(org_id, metric_id, schema)
-
-      event = {
-        "companykey" => org_id,
-        "metrictype" => metric_id,
-        # 1980, so we fit within Drill's epoch
-        "timestamp" => 315532800000,
-        "field1" => true
-      }
-      @e2e.send_event(org_id, metric_id, event)
-
-      # cleanup the event for what we actually exepct to read back
-      event.delete("companykey")
-      event.delete("metrictype")
-
-      # read from dynamo
-      validate(event, @e2e.read_dynamo(org_id, metric_id), "dynamo")
-
-      # convert to parquet and correct directory structure
-      @e2e.batch_process
-
-      # read from parquet
-      validate(event, @e2e.read_parquet(org_id, metric_id), "the underlying files")
-
-      # read from 'both', but really just dynamo b/c we filter out older parquet files
-      validate(event, @e2e.read_all(org_id, metric_id), '"both" dynamo and parquet')
+    it "ingests, batch processes and reads a row", :mode => 'local' do
+      @e2e.drill!("local")
+      @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
+      event = @e2e.event!(event?())
+      state = @e2e.run
+      validate(state, [event])
     end
+  end
 
-    def validate(event, events, source)
-      expect([event]).to eq events
-    end
+  #it "does e2e processing with a standalone drill cluster", :mode => 'standalone_drill' do
+  #  @e2e.drill!("standalone")
+  #  @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
+  #  @e2e.event!(event?())
+  #  @e2e.run
+  #end
+
+  def validate(e2e, events)
+    # read from dynamo
+    expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME)
+
+    # read from parquet
+    expect(events).to eq e2e.read_parquet(ORG_ID, METRIC_NAME)
+
+    # read from 'both', but really just dynamo b/c we filter out older parquet files
+    expect(events).to eq e2e.read_all(ORG_ID, METRIC_NAME)
+  end
+
+  def schema?
+    {
+      "field1" =>{
+        "aliases" => [],
+        "fieldType" => "BOOLEAN"
+      }
+    }
+  end
+
+  def event?
+    {
+      "companykey" => ORG_ID,
+      "metrictype" => METRIC_NAME,
+      # 1980, so we fit within Drill's epoch
+      "timestamp" => 315532800000,
+      "field1" => true
+    }
   end
 end

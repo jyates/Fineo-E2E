@@ -28,7 +28,7 @@ class Dynamo < Resource
     puts "(#{@pid}) Running dynamo from #{@working}. Output/errors is logged to that directory"
   end
 
-  def cleanup
+  def stop
     return unless @started
     puts "Stopping local Dynamo(#{@pid})"
     system("kill -9 #{@pid}")

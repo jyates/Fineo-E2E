@@ -1,4 +1,5 @@
 
+require 'util/run'
 require 'util/javajars'
 require 'util/params'
 
