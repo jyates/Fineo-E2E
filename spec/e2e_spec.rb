@@ -26,10 +26,14 @@ RSpec.describe E2ERunner, "#start" do
       validate(state, [event])
     end
 
-    it "does e2e processing with a standalone drill cluster", :mode => 'standalone_drill' do
+    it "does e2e processing with a standalone drill cluster", :mode => 'standalone' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
       event = @e2e.event!(event?())
+      # skip doing the batch processing for right now...
+      @e2e.spark = nil
+      # setup the steps
+      @e2e.create_schema().send_event()
       state = @e2e.run
       validate(state, [event])
     end
@@ -37,6 +41,7 @@ RSpec.describe E2ERunner, "#start" do
 
   def validate(e2e, events)
     # read from dynamo
+    #Run.enableDebugging
     expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME)
 
     # read from parquet

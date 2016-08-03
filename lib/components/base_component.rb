@@ -2,23 +2,18 @@
 require 'util/run'
 require 'util/javajars'
 require 'util/params'
+require 'util/dirs'
 
 class BaseComponent
   include Run
+  include Dirs
 
-  def initialize(home_env)
-    @home = (Params.env_require home_env)+"/target"
-  end
-
-  def setup_dir(leaf_name)
-    dir = File.join(Params::WORKING_DIR, leaf_name)
-    Dir.mkdir dir unless Dir.exists? dir
-    dir
+  def initialize(env)
+    @home = Params.home(env)
   end
 
   def aws_jars
-    absolute = File.absolute_path(@home)
-    JavaJars.find_aws_jars(absolute)
+    JavaJars.find_aws_jars(@home)
   end
 
 end

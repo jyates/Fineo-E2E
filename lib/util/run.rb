@@ -5,11 +5,11 @@ require "util/command"
 module Run
 
   LOG = ">> tmp/out.log 2>> tmp/error.log"
-  DEBUG_PORT = 5005
 
-  def self.enableDebugging()
+  def self.enableDebugging(port=5005)
     ENV['DEBUG'] = "1"
     ENV['DISABLE_DEBUG_AFTER'] = "1"
+    ENV['DEBUG_PORT']=port.to_s
   end
 
   def run(command, log=true)
@@ -25,7 +25,6 @@ module Run
 
     log_class_start(clazz)
     result = run command
-    ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
     return result
   end
 
@@ -33,8 +32,10 @@ module Run
     command = "java "
 
     unless Params.env('DEBUG', '').empty?
-      puts " ------- Please connect to remote JVM at: #{DEBUG_PORT} -------- "
-      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=#{DEBUG_PORT},suspend=y "
+      port = Params.env('DEBUG_PORT', 5005)
+      puts " ------- Please connect to remote JVM at: #{port} -------- "
+      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=#{port},suspend=y "
+      ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
     end
 
     jars = jars_list.join(':')

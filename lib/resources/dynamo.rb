@@ -18,20 +18,7 @@ class Dynamo < Resource
 
     @port = Params.env('DYNAMO_PORT', '8000')
     cmd = "java -Djava.library.path=#{@working}/DynamoDBLocal_lib -jar #{@working}/DynamoDBLocal.jar -inMemory -port #{@port}"
-    out = "#{@working}/dynamo.out"
-    err = "#{@working}/dynamo.err"
-    @pid = spawn("#{cmd}", :out => "#{out}", :err => "#{err}")
-    Process.detach(@pid)
-    raise "Dynamo didn't start correctly! See #{err} for more info" unless wait_for_dynamo(out, err)
-    @started = true
-
-    puts "(#{@pid}) Running dynamo from #{@working}. Output/errors is logged to that directory"
-  end
-
-  def stop
-    return unless @started
-    puts "Stopping local Dynamo(#{@pid})"
-    system("kill -9 #{@pid}")
+    spawn_process(cmd, self.method(:wait_for_dynamo))
   end
 
 #-----------------------------------------

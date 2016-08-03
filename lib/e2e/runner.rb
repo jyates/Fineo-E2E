@@ -8,6 +8,8 @@ require 'resources/drill/base'
 
 class E2ERunner
 
+  attr_writer :spark
+
   def initialize
     @dynamo = Dynamo.new
     @spark = Spark.new
@@ -70,7 +72,7 @@ class E2ERunner
     ensure_working_dir
     @resources = [@dynamo, @spark, @drill]
     @resources.each{|r|
-      r.start
+      r.start unless r.nil?
     }
 
     e2e = E2EState.new(@dynamo, @spark, @drill)
@@ -81,21 +83,12 @@ class E2ERunner
       step.call(e2e)
     }
 
-
-    # setup the event we want to send
-    #e2e.create_schema(@org, @metric, @schema)
-
-    #e2e.send_event(@org, @metric, @event)
-
-    # convert to parquet and correct directory structure
-    #e2e.batch_process
-
     e2e
   end
 
   def cleanup
     @resources.each{|r|
-      r.stop
+      r.stop unless r.nil?
     }
   end
 

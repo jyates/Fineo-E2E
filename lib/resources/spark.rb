@@ -52,10 +52,6 @@ class Spark < Resource
 
   def stop
     return unless @started
-    run "#{@sbin}/stop-all.sh #{Run::LOG}"
-  end
-
-  def log?
-    " >> #{@working}/out.log 2>> #{@working}/error.log"
+    run "#{@sbin}/stop-all.sh #{log?()}"
   end
 end

@@ -1,40 +1,40 @@
 
-require 'util/params'
 require 'util/run'
-require 'components/base_component'
+require 'util/dirs'
+require 'util/params'
+require 'util/javajars'
+
+require 'resources/base_resource'
 
 # Manages a standalone drill cluster and client server against which you can make SQL requests
-class AvaticaServer < BaseComponent
+class AvaticaServer < Resource
+  include Dirs
+  include Run
 
   SERVER = "io.fineo.read.serve.FineoServer"
 
+  attr_reader :port, :hostname
+
   def initialize
-    super('SERVER_HOME')
-    @working = setup_dir("fineo-server")
+    @home = Params.home('SERVER_HOME')
     @port = 8100
     @hostname = `hostname`.strip
+    @name = "avatica"
   end
 
   def start(zookeeper)
+    @working = setup_dir("fineo-server")
     # build the command line to start the process
-    jars = aws_jars()
+    jars = JavaJars.find_aws_jars(@home)
     opts = {
       "--drill-connection" => "jdbc:drill:zk=#{@hostname}:#{zookeeper}",
       "--port" => "#{@port}"
     }
     command = build_java_command(jars, SERVER, opts, "")
-
-    # spawn a new process for running the local cluster
-    @pid = spawn(command, :out => "#{@working}/avatica.log",
-      :err => "{@working}/avatica-error.log")
-    Process.detach(@pid)
+    spawn_process(command)
   end
 
   def connect_string?
     "jdbc:avatica:remote:serialization=protobuf;url=#{@hostname}:#{@port}"
-  end
-
-  def stop
-    run "kill -9 #{@pid}"
   end
 end

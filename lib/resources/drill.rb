@@ -19,11 +19,12 @@ class DrillResource < BaseDrill
   end
 
   def drill_component?
-    new DrillRemote({ "--drill-connection" => @server.connect_string? })
+    DrillRemote.new({ "--jdbc-host" => @server.hostname,
+                      "--jdbc-port" => @server.port})
   end
 
   def stop
-    @server.stop
     @cluster.stop
+    @server.stop
   end
 end

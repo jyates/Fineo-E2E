@@ -1,32 +1,30 @@
 
-require 'util/params'
 require 'util/run'
-require 'components/base_component'
+require 'util/dirs'
+require 'util/params'
+require 'util/javajars'
+
+require 'resources/base_resource'
 
 # Manages a standalone drill cluster and client server against which you can make SQL requests
-class DrillStandalone < BaseComponent
+class DrillStandalone < Resource
+  include Dirs
+  include Run
 
   DRILL_STANDALONE = "io.fineo.read.drill.StandaloneCluster"
 
   def initialize
-    super('DRILL_STANDALONE_HOME')
-    @working = setup_dir("drill-standalone")
+    @home = Params.home('DRILL_STANDALONE_HOME')
     @zookeeper = 2181
+    @name = "drill-standalone"
   end
 
   def start
+    @working = setup_dir("drill-standalone")
     # build the command line to start the process
-    jars = aws_jars()
+    jars = JavaJars.find_aws_jars(@home)
     command = build_java_command(jars, DRILL_STANDALONE, {}, "")
-
-    # spawn a new process for running the local cluster
-    @pid = spawn(command, :out => "#{@working}/drill-standalone.log",
-      :err => "{@working}/drill-standalone-error.log")
-    Process.detach(@pid)
+    spawn_process(command)
     @zookeeper
-  end
-
-  def stop
-    run "kill -9 #{@pid}"
   end
 end
