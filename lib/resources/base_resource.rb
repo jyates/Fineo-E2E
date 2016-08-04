@@ -32,8 +32,13 @@ class Resource
 
   def stop
     return unless @started
-    puts "Stopping local #{@name}(#{@pid})"
-    system("kill -9 #{@pid}")
+    begin
+      Process.kill(0,@pid)
+      puts "Stopping local #{@name}(#{@pid})"
+      system("kill -9 #{@pid}")
+    rescue
+      puts "Service (#{@pid}) #{name} was prematurely killed! Check logs for more info."
+    end
   end
 
   def log?

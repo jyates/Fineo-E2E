@@ -70,6 +70,7 @@ class E2ERunner
 
   def run
     ensure_working_dir
+    @drill.org!(@org)
     @resources = [@dynamo, @spark, @drill]
     @resources.each{|r|
       r.start unless r.nil?

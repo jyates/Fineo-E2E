@@ -22,13 +22,14 @@ class AvaticaServer < Resource
     @name = "avatica"
   end
 
-  def start(zookeeper)
+  def start(zookeeper, org)
     @working = setup_dir("fineo-server")
     # build the command line to start the process
     jars = JavaJars.find_aws_jars(@home)
     opts = {
       "--drill-connection" => "jdbc:drill:zk=#{@hostname}:#{zookeeper}",
-      "--port" => "#{@port}"
+      "--port" => @port,
+      "--org-id" => org
     }
     command = build_java_command(jars, SERVER, opts, "")
     spawn_process(command)

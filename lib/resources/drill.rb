@@ -15,7 +15,7 @@ class DrillResource < BaseDrill
 
   def start
     zookeeper = @cluster.start
-    @server.start(zookeeper)
+    @server.start(zookeeper, @org)
   end
 
   def drill_component?

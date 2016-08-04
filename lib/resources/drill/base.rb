@@ -8,6 +8,10 @@ class BaseDrill
   def start
   end
 
+  def org!(org)
+    @org = org
+  end
+
   def drill_component?
     DrillLocal.new()
   end

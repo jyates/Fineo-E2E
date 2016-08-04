@@ -30,10 +30,6 @@ RSpec.describe E2ERunner, "#start" do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
       event = @e2e.event!(event?())
-      # skip doing the batch processing for right now...
-      @e2e.spark = nil
-      # setup the steps
-      @e2e.create_schema().send_event()
       state = @e2e.run
       validate(state, [event])
     end
