@@ -1,5 +1,6 @@
 
 require 'e2e/state'
+require 'util/params'
 
 require 'resources/dynamo'
 require 'resources/spark'
@@ -91,6 +92,8 @@ class E2ERunner
     @resources.each{|r|
       r.stop unless r.nil?
     }
+    out = "tmp-#{Random.new().rand(100000)}"
+    FileUtils.mv(Params::WORKING_DIR, out)
   end
 
 private
