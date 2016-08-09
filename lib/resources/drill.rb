@@ -18,9 +18,12 @@ class DrillResource < BaseDrill
     @server.start(zookeeper, @org)
   end
 
-  def drill_component?
-    DrillRemote.new({ "--jdbc-host" => @server.hostname,
-                      "--jdbc-port" => @server.port})
+  def host?
+    @server.hostname
+  end
+
+  def port?
+    @server.port
   end
 
   def stop

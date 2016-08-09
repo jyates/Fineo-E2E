@@ -14,8 +14,9 @@ RSpec.describe E2ERunner, "#start" do
       puts "=== Cleanup ==="
       @e2e.cleanup
     end
-    
-    ORG_ID = "org1"
+
+    # jesse-test-key API KEY from AWS API Gateway
+    ORG_ID = "pmV5QkC0RG7tHMYVdyvgG8qLgNV79Swh3XIiNsF1"
     METRIC_NAME = "metric1"
 
     it "ingests, batch processes and reads a row", :mode => 'local' do
@@ -23,28 +24,35 @@ RSpec.describe E2ERunner, "#start" do
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
       event = @e2e.event!(event?())
       state = @e2e.run
-      validate(state, [event])
+      validate_source(state, [event])
     end
 
     it "does e2e processing with a standalone drill cluster", :mode => 'standalone' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
       event = @e2e.event!(event?())
+      @e2e.skip_batch_process_for_testing!
       state = @e2e.run
-      validate(state, [event])
+      validate(state, [event], ["fineo-local"])
     end
   end
 
-  def validate(e2e, events)
+  def validate(e2e, events, sources)
+    sources.each{|source|
+      validate_source(e2e, events, source)
+    }
+  end
+
+  def validate_source(e2e, events, source=nil)
     # read from dynamo
     #Run.enableDebugging
-    expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME)
+    expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME, source)
 
     # read from parquet
-    expect(events).to eq e2e.read_parquet(ORG_ID, METRIC_NAME)
+    expect(events).to eq e2e.read_parquet(ORG_ID, METRIC_NAME, source)
 
     # read from 'both', but really just dynamo b/c we filter out older parquet files
-    expect(events).to eq e2e.read_all(ORG_ID, METRIC_NAME)
+    expect(events).to eq e2e.read_all(ORG_ID, METRIC_NAME, source)
   end
 
   def schema?

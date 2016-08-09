@@ -20,7 +20,6 @@ class E2EState
     @schema = Schema.new
     @ingest = Ingest.new
     @batch = Batch.new
-    @drill = @drill_cluster.drill_component?
   end
 
   def base_opts
@@ -44,22 +43,24 @@ class E2EState
     @output = @batch.process(base_opts(), @firehose, @spark)
   end
 
-  def read_dynamo(org, metric)
-    read_drill(Drill::DYNAMO, org, metric)
+  def read_dynamo(org, metric, source = nil)
+    read_drill(Drill::DYNAMO, org, metric, source)
   end
 
-  def read_parquet(org, metric)
-    read_drill(Drill::PARQUET, org, metric)
+  def read_parquet(org, metric, source = nil)
+    read_drill(Drill::PARQUET, org, metric, source)
   end
 
-  def read_all(org, metric)
-    read_drill(Drill::BOTH, org, metric)
+  def read_all(org, metric, source = nil)
+    read_drill(Drill::BOTH, org, metric, source)
   end
 
 private
 
-  def read_drill(mode, org, metric)
-    read = @drill.read(base_opts(), mode, org, metric, @output, @ingest.store_prefix)
+  def read_drill(mode, org, metric, source)
+    read = Drill.from(@drill_cluster, source)
+      .with(mode, base_opts(), @output, @ingest.store_prefix)
+      .read(org, metric)
     # read the data
     file = File.read(read)
     JSON.parse(file)

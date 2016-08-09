@@ -1,10 +1,20 @@
 
 require 'ostruct'
-require 'components/drill'
+require 'components/base_component'
+require 'components/drill/drill_component'
 
-class DrillLocal < Drill
+class DrillLocal < BaseComponent
+  include DrillComponent
 
-  def initialize()
-    super('DRILL_LOCAL_READ_HOME', {}, "local")
+  DRILL = "io.fineo.read.drill.e2e.EndToEndWrapper"
+
+  def initialize(source)
+    super('DRILL_LOCAL_READ_HOME')
+    @source = source
+  end
+
+  def read_internal(context)
+    setup_dir(context.dir)
+    java(aws_jars(), DRILL, context.opts, "local")
   end
 end

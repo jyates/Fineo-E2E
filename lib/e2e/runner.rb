@@ -9,12 +9,16 @@ require 'resources/drill/base'
 
 class E2ERunner
 
-  attr_writer :spark
-
   def initialize
     @dynamo = Dynamo.new
     @spark = Spark.new
     @steps = []
+
+    if File.exist? Params::WORKING_DIR
+      out = "tmp-#{Random.new().rand(100000)}"
+      FileUtils.mv(Params::WORKING_DIR, out)
+      puts "Moved previous output to #{out}"
+    end
   end
 
   def drill!(mode)
@@ -92,8 +96,11 @@ class E2ERunner
     @resources.each{|r|
       r.stop unless r.nil?
     }
-    out = "tmp-#{Random.new().rand(100000)}"
-    FileUtils.mv(Params::WORKING_DIR, out)
+  end
+
+  def skip_batch_process_for_testing!
+      self.create_schema().send_event()
+      @spark = nil
   end
 
 private

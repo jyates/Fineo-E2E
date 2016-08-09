@@ -1,8 +1,10 @@
 
 require 'ostruct'
 require 'components/base_component'
+require 'components/drill/local'
+require 'components/drill/remote'
 
-class Drill < BaseComponent
+module Drill
 
   DYNAMO = lambda { |context|
      context.opts["--dynamo-table-prefix"] = context.prefix
@@ -18,25 +20,12 @@ class Drill < BaseComponent
     File.join(context.dir, "read-both.json")
   }
 
-  DRILL = "io.fineo.read.drill.e2e.EndToEndWrapper"
-
-  def initialize(home, addtl_opts={}, command)
-    super(home)
-    @addtl_opts = addtl_opts
-    @command = command
+  def self.from(cluster, source=nil)
+    case source
+    when nil
+      DrillLocal.new(source)
+    when "avatica", "fineo-local", "fineo-aws"
+      DrillRemote.new(cluster, source)
+    end
   end
-
-  def read(opts, mode, org, metric, batch_output_dir, dynamo_table_prefix)
-    file_dir = setup_dir("drill_read")
-    context = OpenStruct.new(:opts => opts, :org => org, :metric => metric,
-      :batch => batch_output_dir, :prefix => dynamo_table_prefix, :dir => file_dir)
-    file = mode.call(context)
-    opts["--output"] = file
-    opts["--org"] = org
-    opts["--metric"] = metric
-
-    java(aws_jars(), DRILL, opts.merge(@addtl_opts), @command)
-    file
-  end
-
 end
