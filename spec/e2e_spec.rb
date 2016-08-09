@@ -24,7 +24,7 @@ RSpec.describe E2ERunner, "#start" do
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
       event = @e2e.event!(event?())
       state = @e2e.run
-      validate_source(state, [event])
+      validate(state, [event])
     end
 
     it "does e2e processing with a standalone drill cluster", :mode => 'standalone' do
