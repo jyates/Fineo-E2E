@@ -31,6 +31,7 @@ class AvaticaServer < Resource
       "--port" => @port,
       "--org-id" => org
     }
+    #Run.enableDebugging
     command = build_java_command(jars, SERVER, opts, "")
     spawn_process(command)
   end

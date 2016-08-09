@@ -10,7 +10,7 @@ export INGEST_WRITE_HOME=${INGEST_WRITE_HOME:-../ingest/pipeline/stream-processi
 export BATCH_ETL_HOME=${BATCH_ETL_HOME:-../ingest/batch-parent/batch-etl-e2e}
 export DRILL_STANDALONE_HOME=${DRILL_STANDALONE_HOME:-../readerator/drill-standalone}
 export DRILL_LOCAL_READ_HOME=${DRILL_LOCAL_READ_HOME:-../readerator/e2e/e2e-testing}
-export SERVER_HOME=${SERVER_HOME:-../readerator/serve}
+export SERVER_HOME=${SERVER_HOME:-../readerator/readerator/server}
 export DRILL_REMOTE_READ_HOME=${DRILL_REMOTE_READ_HOME:-../readerator/e2e/e2e-read-testing}
 
 # You can also just pass through arguments to rspec. In particular, its likely the "--tag" 

@@ -37,7 +37,7 @@ class Resource
       puts "Stopping local #{@name}(#{@pid})"
       system("kill -9 #{@pid}")
     rescue
-      puts "Service (#{@pid}) #{name} was prematurely killed! Check logs for more info."
+      puts "Service (#{@pid}) #{@name} was prematurely killed! Check logs for more info."
     end
   end
 

@@ -12,8 +12,6 @@ class Standalone < BaseComponent
   end
 
   def exec(context)
-    setup_dir(context.dir)
-
     opts = context.opts
     # aws credentials
     opts["--auth-profile-name"] = "test-user" if @source == "fineo-aws"
@@ -25,7 +23,7 @@ class Standalone < BaseComponent
     # remove the options we don't need
 
     # hit it!
-    Run.enableDebugging
+    #Run.enableDebugging 5006
     java(aws_jars(), DRILL, context.opts, @source)
   end
 end

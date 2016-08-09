@@ -31,21 +31,14 @@ RSpec.describe E2ERunner, "#start" do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
       event = @e2e.event!(event?())
-      @e2e.skip_batch_process_for_testing!
+      #@e2e.skip_batch_process_for_testing!
       state = @e2e.run
-      validate(state, [event], ["fineo-local"])
+      validate(state, [event], "fineo-local")
     end
   end
 
-  def validate(e2e, events, sources)
-    sources.each{|source|
-      validate_source(e2e, events, source)
-    }
-  end
-
-  def validate_source(e2e, events, source=nil)
+  def validate(e2e, events, source=nil)
     # read from dynamo
-    #Run.enableDebugging
     expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME, source)
 
     # read from parquet

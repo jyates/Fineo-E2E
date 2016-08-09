@@ -14,7 +14,6 @@ class DrillLocal < BaseComponent
   end
 
   def read_internal(context)
-    setup_dir(context.dir)
     java(aws_jars(), DRILL, context.opts, "local")
   end
 end
