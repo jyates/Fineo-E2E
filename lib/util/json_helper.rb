@@ -10,7 +10,7 @@ module JsonHelper
     # find a new ending for the command request file
     while(File.exists?(out)) do
       ending = ending +1
-      out = out+ending
+      out = "#{out}#{ending}"
     end
 
     Dir.mkdir dir unless Dir.exists? dir

@@ -36,14 +36,23 @@ class E2ERunner
     @schema = schema
   end
 
-  def event!(event)
-    @event = event
-    expected = event.dup
+  def events!(events)
+    @events = events
+    expected = []
 
-    # cleanup the event for what we actually exepct to read back
-    expected.delete("companykey")
-    expected.delete("metrictype")
+    events.each{|event|
+      d = event.dup
+      # cleanup the event for what we actually expect to read back
+      d.delete("companykey")
+      d.delete("metrictype")
+      expected << d
+    }
     expected
+  end
+
+
+  def event!(event)
+    events!([event])[0]
   end
 
   def create_schema
@@ -55,7 +64,7 @@ class E2ERunner
 
   def send_event
     @steps << lambda{ |e2e|
-      e2e.send_event(@org, @metric, @event)
+      e2e.send_event(@org, @metric, @events)
     }
     self
   end

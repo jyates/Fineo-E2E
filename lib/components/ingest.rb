@@ -14,9 +14,9 @@ class Ingest < BaseComponent
     @store_prefix = "ingest-e2e_test-#{Random.rand(100000)}"
   end
 
-  def send(options, org_id, user_metric_name, event_hash)
+  def send(options, org_id, user_metric_name, events)
     file_dir = setup_dir("events")
-    file = JsonHelper.write(file_dir, "event", event_hash)
+    file = JsonHelper.write(file_dir, "event", events)
     options["--json"] = File.absolute_path(file)
 
     options["--ingest-table-prefix"] = @store_prefix
