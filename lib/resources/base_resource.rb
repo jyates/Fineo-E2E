@@ -20,6 +20,9 @@ class Resource
   def spawn_process(cmd, verify=Proc.new {|o,e| true})
     out = "#{@working}/#{@name}.out"
     err = "#{@working}/#{@name}.err"
+    File.open("#{out}.start", "w"){|file|
+      file.write(cmd)
+    }
     @pid = spawn("#{cmd}", :out => "#{out}", :err => "#{err}")
     Process.detach(@pid)
     unless verify.call(out, err)
