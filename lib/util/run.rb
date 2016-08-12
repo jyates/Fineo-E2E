@@ -34,7 +34,7 @@ module Run
     unless Params.env('DEBUG', '').empty?
       port = Params.env('DEBUG_PORT', 5005)
       puts " ------- Please connect to remote JVM at: #{port} -------- "
-      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,address=#{port},suspend=y "
+      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=#{port} "
       ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
     end
 
