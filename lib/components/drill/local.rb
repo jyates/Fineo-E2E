@@ -6,7 +6,7 @@ require 'components/drill/drill_component'
 class DrillLocal < BaseComponent
   include DrillComponent
 
-  DRILL = "io.fineo.read.drill.e2e.EndToEndWrapper"
+  DRILL = "io.fineo.read.drill.e2e.ReadFromDrillLocal"
 
   def initialize(source)
     super('DRILL_LOCAL_READ_HOME')
