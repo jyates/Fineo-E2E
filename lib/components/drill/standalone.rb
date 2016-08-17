@@ -3,7 +3,7 @@ require 'components/base_component'
 
 class Standalone < BaseComponent
 
-  DRILL = "io.fineo.read.drill.e2e.EndToEndWrapper"
+  DRILL = "io.fineo.read.drill.e2e.ReadFromDrill"
 
   def initialize(home, cluster, source)
     super(home)
