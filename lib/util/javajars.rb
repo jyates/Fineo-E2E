@@ -8,7 +8,6 @@ module JavaJars
   def self.find_jars(path, suffix)
     absolute = File.absolute_path(path)
     jars = JavaJars.find_jars_in(absolute, suffix)
-    # target for cases when running locally against repos. Shouldn't be used in CI tools
     dir = File.join(absolute, "target")
     jars = JavaJars.find_jars_in(dir, suffix) if (jars.nil? || jars.empty?) && Dir.exists?(dir)
     jars
