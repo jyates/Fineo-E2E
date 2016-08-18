@@ -14,7 +14,7 @@ module Params
   end
 
   def self.home(home_env)
-    (Params.env_require home_env)+"/target"
+    (Params.env_require home_env)
   end
 
   WORKING_DIR = env('WORKING_DIR', 'tmp/')
