@@ -7,16 +7,14 @@ import com.google.inject.Module;
 import io.fineo.e2e.module.FakeAwsCredentialsModule;
 import io.fineo.etl.FineoProperties;
 import io.fineo.lambda.configure.PropertiesModule;
-import io.fineo.lambda.configure.SchemaStoreModule;
 import io.fineo.lambda.configure.dynamo.DynamoModule;
 import io.fineo.lambda.dynamo.DynamoTestConfiguratorModule;
+import io.fineo.lambda.handle.schema.inject.SchemaStoreModule;
 import io.fineo.schema.store.SchemaStore;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-
-import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Options for the location of a locally running (e.g. not in amazon) store
