@@ -31,12 +31,18 @@ module Run
   def build_java_command(jars_list, clazz, args_hash, cmd, cmd_opts={})
     command = "java "
 
-    unless Params.env('DEBUG', '').empty?
-      port = Params.env('DEBUG_PORT', 5005)
-      puts " ------- Please connect to remote JVM at: #{port} -------- "
-      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=#{port} "
-      ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
+    if Params.env('DEBUG', '').empty?
+      suspend =  'n'
+      suspend_text = ""
+    else
+      suspend == 'y'
+      suspend_text = " ==SUSPENDED=="
     end
+
+    port = Params.env('DEBUG_PORT', 5005)
+    puts " -------#{suspend_text} Please connect to remote JVM at: #{port} -------- "
+    command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=#{suspend},address=#{port} "
+    ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
 
     jars = jars_list.join(':')
     raise "No jars found for class: #{clazz}!" if jars.empty?
