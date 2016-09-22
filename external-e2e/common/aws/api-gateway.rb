@@ -46,25 +46,51 @@ class Fineo::Aws::ApiGateway
   end
 
   def delete_key(id)
-    @client.delete_api_key(api_key: id)
+    begin
+      @client.delete_api_key(api_key: id)
+    rescue Aws::APIGateway::Errors::NotFoundException
+      puts "Could not delete key: #{id} - NOT FOUND!"
+    end
   end
 
   def delete_plan(id)
-    # remove all the stages from the plan
+    # get all the stages
     plan = @client.get_usage_plan(usage_plan_id: id)
-    plan.api_stages.each{|stage|
-        @client.update_usage_plan(
-            usage_plan_id: id,
-            patch_operations: [
-              {
-                op: "remove",
-                path: "",
-                value: "",
-                from: ""
-              }
-            ]
-          )
+    # convert them info remove requests
+    ops = plan.api_stages.map{|stage|
+      {
+        op: "remove",
+        path: "/apiStages",
+        value: "#{stage.api_id}:prod",
+      }
     }
-    @client.delete_usage_plan(usage_plan_id: id)
+
+    # update the usage plan
+    with_retry( lambda {
+      @client.update_usage_plan(
+        usage_plan_id: id,
+        patch_operations: ops
+      )
+    })
+
+    # delete the plan now that its empty
+    with_retry( lambda {
+      @client.delete_usage_plan(usage_plan_id: id)
+      })
+  end
+
+private
+
+  def with_retry(proc, index=1)
+    raise "Could not complete action within #{index} attempts" if index > 7
+    begin
+      proc.call
+    rescue Aws::APIGateway::Errors::TooManyRequestsException => e
+      time = 30 * index
+      time = [time, 90].min
+      puts "   request failed, retrying in #{time} seconds"
+      sleep(time)
+      with_retry(proc, index +1)
+    end
   end
 end
