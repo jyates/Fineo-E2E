@@ -6,8 +6,13 @@ File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
   $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
 }
 
-require 'setting-up'
-include Fineo::E2E::SettingUp
+# include the "common" directory
+File.expand_path(File.join(__dir__, "..", "..", "common")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'setup-delete'
+include Fineo::E2E::SetupDelete
 
 options = parse(ARGV, "delete-key", "Delete an API key for E2E testing")
 
@@ -16,4 +21,4 @@ client = Fineo::Aws::ApiGateway.new(options.credentials, options.verbose)
 
 # create a key
 key = client.delete_key(options.info["key"])
-read = client.delete_plan(options.info["read-plan")
+read = client.delete_plan(options.info["read-plan"])

@@ -8,7 +8,7 @@ require 'optparse'
 require 'ostruct'
 require 'json'
 
-module Fineo::E2E::SettingUp
+module Fineo::E2E::SetupDelete
 
   def parse(args, name, info)
     options = OpenStruct.new

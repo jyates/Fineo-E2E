@@ -31,9 +31,9 @@ options.plans.each{|plan_id|
 
 # Log the update information
 output = {
-  key: key.id
-  read-plan: read.id
-  plans: options.plans
+  key: key.id,
+  "read-plan" => read.id,
+  plans: options.plans,
 }
 
 require 'json'

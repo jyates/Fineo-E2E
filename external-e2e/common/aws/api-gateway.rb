@@ -44,4 +44,27 @@ class Fineo::Aws::ApiGateway
         key_type: "API_KEY"
       )
   end
+
+  def delete_key(id)
+    @client.delete_api_key(api_key: id)
+  end
+
+  def delete_plan(id)
+    # remove all the stages from the plan
+    plan = @client.get_usage_plan(usage_plan_id: id)
+    plan.api_stages.each{|stage|
+        @client.update_usage_plan(
+            usage_plan_id: id,
+            patch_operations: [
+              {
+                op: "remove",
+                path: "",
+                value: "",
+                from: ""
+              }
+            ]
+          )
+    }
+    @client.delete_usage_plan(usage_plan_id: id)
+  end
 end
