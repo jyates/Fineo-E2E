@@ -4,6 +4,7 @@ require "util/command"
 
 module Run
 
+  next_port = 5005
   LOG = ">> tmp/out.log 2>> tmp/error.log"
 
   def self.enableDebugging(port=5005)
@@ -39,7 +40,8 @@ module Run
       suspend_text = " ==SUSPENDED=="
     end
 
-    port = Params.env('DEBUG_PORT', 5005)
+    port = Params.env('DEBUG_PORT', next_port)
+    next_port = next_port + 1
     puts " -------#{suspend_text} Please connect to remote JVM at: #{port} -------- "
     command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=#{suspend},address=#{port} "
     ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
