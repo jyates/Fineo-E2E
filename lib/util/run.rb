@@ -4,7 +4,6 @@ require "util/command"
 
 module Run
 
-  next_port = 5005
   LOG = ">> tmp/out.log 2>> tmp/error.log"
 
   def self.enableDebugging(port=5005)
@@ -32,19 +31,12 @@ module Run
   def build_java_command(jars_list, clazz, args_hash, cmd, cmd_opts={})
     command = "java "
 
-    if Params.env('DEBUG', '').empty?
-      suspend =  'n'
-      suspend_text = ""
-    else
-      suspend == 'y'
-      suspend_text = " ==SUSPENDED=="
+    unless Params.env('DEBUG', '').empty?
+      port = Params.env('DEBUG_PORT', 5005)
+      puts " ------- Please connect to remote JVM at: #{port} -------- "
+      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=#{port} "
+      ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
     end
-
-    port = Params.env('DEBUG_PORT', next_port)
-    next_port = next_port + 1
-    puts " -------#{suspend_text} Please connect to remote JVM at: #{port} -------- "
-    command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=#{suspend},address=#{port} "
-    ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
 
     jars = jars_list.join(':')
     raise "No jars found for class: #{clazz}!" if jars.empty?
