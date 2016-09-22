@@ -20,7 +20,7 @@ class Resource
   def spawn_process(cmd, verify=Proc.new {|o,e| true})
     out = "#{@working}/#{@name}.log"
     err = "#{@working}/#{@name}-error.log"
-    File.open("#{out}-start.txt", "w"){|file|
+    File.open("#{@working}/#{@name}-start.log", "w"){|file|
       file.write(cmd)
     }
     @pid = spawn("#{cmd}", :out => "#{out}", :err => "#{err}")
