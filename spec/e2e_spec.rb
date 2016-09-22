@@ -38,12 +38,13 @@ RSpec.describe E2ERunner, "#start" do
   end
 
   def validate(e2e, events, source=nil)
-    # read from dynamo
+    puts "Trying to read from dynamo...."
     expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME, source)
 
-    # read from parquet
+    puts "Trying to read from parquet files...."
     expect(events).to eq e2e.read_parquet(ORG_ID, METRIC_NAME, source)
 
+    puts "Trying to read from dynamo && parquet files...."
     # read from 'both', but really just dynamo b/c we filter out older parquet files
     expect(events).to eq e2e.read_all(ORG_ID, METRIC_NAME, source)
   end

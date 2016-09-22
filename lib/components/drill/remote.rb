@@ -19,6 +19,8 @@ class DrillRemote
   def read_internal(context)
     # run the job
     @bootstrap.exec(context)
+    puts "   Waiting a litte bit in hopes that read will work more often..."
+    sleep(5)
     @read.exec(context)
   end
 end
