@@ -1,5 +1,5 @@
 
-require 'aws-sdk'
+require 'aws'
 require 'aws/credentials'
 
 class Fineo::Aws::ApiGateway
@@ -22,7 +22,7 @@ class Fineo::Aws::ApiGateway
       )
   end
 
-  def create_read_plan(api_id)
+  def create_plan(api_id)
     puts "Creating usage plan for id: #{api_id}" if @verbose
     @client.create_usage_plan(
         name: "[#{@id}] Test Read Plan - #{api_id}",

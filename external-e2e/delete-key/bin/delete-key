@@ -1,0 +1,19 @@
+#!/usr/bin/env ruby
+# Delete an external api key for e2e testing
+
+# include the "lib" directory
+File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'setting-up'
+include Fineo::E2E::SettingUp
+
+options = parse(ARGV, "delete-key", "Delete an API key for E2E testing")
+
+require 'aws/api-gateway'
+client = Fineo::Aws::ApiGateway.new(options.credentials, options.verbose)
+
+# create a key
+key = client.delete_key(options.info["key"])
+read = client.delete_plan(options.info["read-plan")

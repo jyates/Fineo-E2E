@@ -6,22 +6,18 @@ end
 
 require 'optparse'
 require 'ostruct'
+require 'json'
 
 module Fineo::E2E::SettingUp
 
   def parse(args, name, info)
-    options = OpenStruct.new(plans: [])
+    options = OpenStruct.new
     OptionParser.new do |opts|
       opts.banner = "Usage: #{name} [options]"
       opts.separator info
 
-      opts.on("--read-api-id API_ID", "ID of the read API") do |id|
-        options.read = id
-      end
-
-      opts.on("--plan PLAN_ID", "ID of a usage plan to which we should add the key. REPEATABLE") do
-      |plan|
-        options.plans << plan
+      opts.on("--setup-props PROPERTIES", "JSON properties from the setup phase") do |setup|
+        options.info = JSON.parse(File.read(setup))
       end
 
       opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
