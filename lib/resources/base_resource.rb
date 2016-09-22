@@ -18,9 +18,9 @@ class Resource
   end
 
   def spawn_process(cmd, verify=Proc.new {|o,e| true})
-    out = "#{@working}/#{@name}.out"
-    err = "#{@working}/#{@name}.err"
-    File.open("#{out}.start", "w"){|file|
+    out = "#{@working}/#{@name}.log"
+    err = "#{@working}/#{@name}-error.log"
+    File.open("#{out}-start.txt", "w"){|file|
       file.write(cmd)
     }
     @pid = spawn("#{cmd}", :out => "#{out}", :err => "#{err}")
@@ -36,7 +36,7 @@ class Resource
   def stop
     return unless @started
     begin
-      Process.kill(0,@pid)
+      Process.kill(0, @pid)
       puts "Stopping local #{@name}(#{@pid})"
       system("kill -9 #{@pid}")
     rescue
