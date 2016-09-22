@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+# Setup an external api key for e2e testing
+
+# include the "lib" directory
+File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'setting-up'
+include Fineo::E2E::SettingUp
+
+options = parse(ARGV)
+
+require 'aws/api-gateway'
+client = Fineo::Aws::ApiGateway.new(options.credentials, options.verbose)
+
+# create a key
+key = client.create_key()
+read = client.create_read_plan(options.read)
+
+# add the key to all the necessary plans
+[options.schema, options.write, read.id].each{|plan_id|
+  client.add_to_plan(plan_id, key)
+}
