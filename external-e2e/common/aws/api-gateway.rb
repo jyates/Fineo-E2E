@@ -39,10 +39,10 @@ class Fineo::Aws::ApiGateway
   end
 
   def add_to_plan(id, key)
-    puts "Adding key [#{key.id} - #{key.name}] to plan: #{id}"
+    puts "Adding key [#{key}] to plan: #{id}"
     @client.create_usage_plan_key(
         usage_plan_id: id,
-        key_id: key.id,
+        key_id: key,
         key_type: "API_KEY"
       )
   end

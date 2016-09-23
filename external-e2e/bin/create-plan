@@ -14,14 +14,15 @@ File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
 require 'optparse'
 require 'ostruct'
 require 'aws/api-gateway'
+require 'json'
 
 options = OpenStruct.new(apis: [])
 OptionParser.new do |opts|
-  opts.banner = "Usage: #{File.basename($0} [options]"
+  opts.banner = "Usage: #{File.basename($0)} [options]"
   opts.separator "Create a usage plan that includes the specified apis and api key"
 
-  opts.on("--api-key KEY_INFO", "ApiKey information. JSON hash where the api key is under 'value'.") do |id|
-    options.key = id
+  opts.on("--api-key ID", "ID of the api key to add to the generated plan") do |key|
+    options.key = key
   end
 
   opts.on("--api API_ID", "ID of API that should be included in the plan. REPEATABLE") do |plan|
@@ -29,7 +30,7 @@ OptionParser.new do |opts|
   end
 
   opts.on("-o", "--out FILE", "Where to write the resulting usage plan ID. Default: [Console]") do |file|
-    options.out << file
+    options.out = file
   end
 
   opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
@@ -44,18 +45,17 @@ OptionParser.new do |opts|
     puts opts
     exit
   end
-
-end.parse!(args)
+end.parse!(ARGV)
 
 # create a plan that allows access to the given api stages
 client = Fineo::Aws::ApiGateway.new(options.credentials, options.verbose)
 resp = client.create_plan(options.apis)
-client.add_to_plan(resp.id, key)
+client.add_to_plan(resp.id, options.key)
 
 output = {
   id: resp.id,  
   name:resp.name,
-  description: resp.description
+  description: resp.description,
   api_stages: resp.api_stages  
 }
 

@@ -5,11 +5,34 @@ File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
   $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
 }
 
-require 'stacking'
-include Fineo::E2E::Stacking
+# include the "common" directory
+File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
 
-options = parse(ARGV, "stack_to_api_id", "Convert a stack name into its API ID")
+require 'optparse'
+require 'ostruct'
 require 'aws/credentials'
+
+options = OpenStruct.new
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options]"
+  opts.separator "Convert a stack name into its API ID"
+
+  opts.on("--stack NAME", "Name of the cloudformation stack") do |name|
+    options.name = name
+  end
+
+  opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
+    options.credentials = s
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!(ARGV)
+
 creds = Fineo::Aws::Credentials.load(options.credentials)
 info = {
   access_key_id: creds['access_key_id'],
@@ -21,17 +44,18 @@ resource = Aws::CloudFormation::Resource.new(info)
 cloudformation =  Aws::CloudFormation::Client.new(info)
 
 stack = resource.stack(options.name)
+found = false
 begin
   stack.resource_summaries.each{|resource|
     id = resource.logical_id
     sr = stack.resource(id)
     # assume only 1 RestApi per stack
-    next unless rs.resource_type == "AWS::ApiGateway::RestApi"
+    next unless sr.resource_type == "AWS::ApiGateway::RestApi"
 
     # found the id - output that
-    puts stack.physical_resource_id
+    puts sr.physical_resource_id
     found = true
-    throw StopIteration
+    break
   }
 rescue StopIteration
 end

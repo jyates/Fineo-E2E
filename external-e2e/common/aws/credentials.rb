@@ -5,6 +5,7 @@ require 'yaml'
 module Fineo::Aws::Credentials
 
   def self.load(credentials_file)
+    raise "No credentials file specified" if credentials_file.nil?
     begin
       creds = YAML.load(File.read(credentials_file))
     rescue Exception => e

@@ -24,11 +24,15 @@ OptionParser.new do |opts|
     options.credentials = s
   end
 
+  opts.on("--out FILE", "Location to write the full key properties") do |out|
+    options.out = out
+  end
+
   opts.on_tail("-h", "--help", "Show this message") do
     puts opts
     exit
   end
-end.parse!(args)
+end.parse!(ARGV)
 
 client = Fineo::Aws::ApiGateway.new(options.credentials, false)
 
@@ -36,6 +40,10 @@ client = Fineo::Aws::ApiGateway.new(options.credentials, false)
 key = client.create_key()
 
 # and echo it to the console
+puts key.id
+
+exit 0 unless options.out
+
 require 'json'
 map = {
   id: key.id,
@@ -44,5 +52,5 @@ map = {
   description: key.description,
   enabled: key.enabled
 }
+File.write(options.out, JSON.pretty_generate(map))
 
-puts JSON.pretty_generate(map)
