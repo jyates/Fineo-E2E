@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# Convert a stack name into an api id
+
+File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'stacking'
+include Fineo::E2E::Stacking
+
+options = parse(ARGV, "stack_to_api_id", "Convert a stack name into its API ID")
+require 'aws/credentials'
+creds = Fineo::Aws::Credentials.load(options.credentials)
+info = {
+  access_key_id: creds['access_key_id'],
+  secret_access_key: creds['secret_access_key'],
+  validate_params: true,
+  log_level: :debug
+}
+resource = Aws::CloudFormation::Resource.new(info)
+cloudformation =  Aws::CloudFormation::Client.new(info)
+
+stack = resource.stack(options.name)
+begin
+  stack.resource_summaries.each{|resource|
+    id = resource.logical_id
+    sr = stack.resource(id)
+    # assume only 1 RestApi per stack
+    next unless rs.resource_type == "AWS::ApiGateway::RestApi"
+
+    # found the id - output that
+    puts stack.physical_resource_id
+    found = true
+    throw StopIteration
+  }
+rescue StopIteration
+end
+
+raise "No API found for stack: #{options.name}" unless found
