@@ -22,6 +22,7 @@ environment_id="ruby-2.1.1@fineoe2e"
 if [[ -d "${rvm_path:-$HOME/.rvm}/environments"
   && -s "${rvm_path:-$HOME/.rvm}/environments/$environment_id" ]]
 then
+  rvm_path=${rvm_path:-$HOME/.rvm}
   \. "${rvm_path:-$HOME/.rvm}/environments/$environment_id"
   for __hook in "${rvm_path:-$HOME/.rvm}/hooks/after_use"*
   do
