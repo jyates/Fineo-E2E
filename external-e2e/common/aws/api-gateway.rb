@@ -24,15 +24,17 @@ class Fineo::Aws::ApiGateway
 
   def create_plan(api_id)
     puts "Creating usage plan for id: #{api_id}" if @verbose
-    @client.create_usage_plan(
-        name: "[#{@id}] Test Read Plan - #{api_id}",
-        description: "Plan to support reading api: #{api_id}",
-        api_stages: [
-          {
-            api_id: api_id,
+    stages = api_id.map{|api|
+        {
+            api_id: api,
             stage: "prod"
-          }
-        ]
+        }
+    }
+
+    @client.create_usage_plan(
+        name: "[#{@id}] Test Read Plan",
+        description: "Plan to enable reading test apis",
+        api_stages: stages
       )
   end
 
