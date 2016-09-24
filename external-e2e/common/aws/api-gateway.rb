@@ -14,10 +14,10 @@ class Fineo::Aws::ApiGateway
     @id = Random.new().rand(1000000)
   end
 
-  def create_key()
+  def create_key(suffix="")
     puts "Creating key..." if @verbose
     @client.create_api_key(
-      name: "[#{@id}] Test-Api: #{Time.now}",
+      name: "[#{@id}] Test-Api: #{Time.now} - #{suffix}",
       enabled: true,
       )
   end

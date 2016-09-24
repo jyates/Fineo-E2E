@@ -24,6 +24,10 @@ OptionParser.new do |opts|
     options.credentials = s
   end
 
+  opts.on("--suffix SUFFIX", "Suffix to append to the name of key") do |suffix|
+    options.suffix = suffix
+  end
+
   opts.on("--out FILE", "Location to write the full key properties") do |out|
     options.out = out
   end
@@ -37,7 +41,7 @@ end.parse!(ARGV)
 client = Fineo::Aws::ApiGateway.new(options.credentials, false)
 
 # create the key
-key = client.create_key()
+key = client.create_key(options.suffix)
 
 # and echo it to the console
 puts key.id
