@@ -20,8 +20,8 @@ class Fineo::Aws::Cloudformation
     info = {stack_name: name}
     @client.delete_stack(info)
     @client.wait_until(:stack_delete_complete, info) do |waiter|
-      w.max_attempts = nil
-      w.delay = 15
+      waiter.max_attempts = nil
+      waiter.delay = 15
     end
   end
 end
