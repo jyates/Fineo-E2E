@@ -17,4 +17,4 @@ exit 0 if j1 == j2
 
 # figure out why they are different
 diff = j1.to_a - j2.to_a
-abort("Objects are different! \n First[#{file1}]: \n#{j1}\n Second[#{file2}]:\n#{file2}\n\nDifference:\n#{diff}")
+abort("Objects are different! \n First[#{file1}]: \n#{j1}\n Second[#{file2}]:\n#{j2}\n\nDifference:\n#{diff}")

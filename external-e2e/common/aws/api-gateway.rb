@@ -47,19 +47,21 @@ class Fineo::Aws::ApiGateway
       )
   end
 
-  def delete_key(id)
+  def delete_key(id, strict=false)
     begin
       @client.delete_api_key(api_key: id)
-    rescue Aws::APIGateway::Errors::NotFoundException
+    rescue Aws::APIGateway::Errors::NotFoundException => e
+      raise e if strict
       puts "Could not delete key: #{id} - NOT FOUND!"
     end
   end
 
-  def delete_plan(id)
+  def delete_plan(id, allow_stages=false)
     # get all the stages
     plan = @client.get_usage_plan(usage_plan_id: id)
     # convert them info remove requests
     ops = plan.api_stages.map{|stage|
+      raise "No stages are allowed to be present in the plan! Found stages: #{plan.api_stages}" unless allow_stages
       {
         op: "remove",
         path: "/apiStages",
@@ -67,18 +69,21 @@ class Fineo::Aws::ApiGateway
       }
     }
 
-    # update the usage plan
-    with_retry( lambda {
-      @client.update_usage_plan(
-        usage_plan_id: id,
-        patch_operations: ops
-      )
-    })
+    # cleanup the existing stages
+    if allow_stages
+      # update the usage plan
+      with_retry( lambda {
+        @client.update_usage_plan(
+          usage_plan_id: id,
+          patch_operations: ops
+        )
+      })
+    end
 
     # delete the plan now that its empty
     with_retry( lambda {
       @client.delete_usage_plan(usage_plan_id: id)
-      })
+    })
   end
 
 private

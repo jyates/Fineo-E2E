@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-# Delete an external api key for e2e testing
 
 # include the "lib" directory
 File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
@@ -13,18 +12,23 @@ File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
 
 require 'optparse'
 require 'ostruct'
+require 'aws/api-gateway'
 
 options = OpenStruct.new()
 OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options]"
-  opts.separator "Delete a cloudformation stack"
+  opts.separator "Delete an api usage plan"
 
   opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
     options.credentials = s
   end
 
-  opts.on("--id STACK_NAME", "Unique 'ID' of the stack or the stack name") do |id|
-    options.id = id
+  opts.on("--plan PLAN_ID", "ID of the usage plan") do |key|
+    options.key = key
+  end
+
+  opts.on("--allow-delete-stages", "If we should allow existing stages to be removed from the plan.") do |a|
+    options.stages = true
   end
 
   opts.on_tail("-h", "--help", "Show this message") do
@@ -33,8 +37,6 @@ OptionParser.new do |opts|
   end
 end.parse!(ARGV)
 
-require 'aws/cloudformation'
-client = Fineo::Aws::Cloudformation.new(options.credentials, options.verbose)
+client = Fineo::Aws::ApiGateway.new(options.credentials, options.verbose)
 
-# create a key
-client.delete_stack(options.id)
+client.delete_plan(options.key, options.stages)
