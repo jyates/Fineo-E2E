@@ -23,8 +23,9 @@ OptionParser.new do |opts|
     options.credentials = s
   end
 
-  opts.on("--plan PLAN_ID", "ID of the usage plan") do |key|
-    options.key = key
+  opts.on("--plan PLAN_INFO", "Json representation of the plan") do |plan|
+    require 'json'
+    options.key = JSON.parse(File.read(plan))["id"]
   end
 
   opts.on("--allow-delete-stages", "If we should allow existing stages to be removed from the plan.") do |a|
