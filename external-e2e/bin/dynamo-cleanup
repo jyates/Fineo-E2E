@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+
+# include the "lib" directory
+File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+# include the "common" directory
+File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'optparse'
+require 'ostruct'
+require 'aws/dynamo'
+
+options = OpenStruct.new()
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options]"
+  opts.separator "Cleanup test dynamo tables"
+
+  opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
+    options.credentials = s
+  end
+
+  opts.on("--stack-properties PROPERTIES_FILE", "JSON properties file for a stack (e.g. stream) that defines the dynamo ingest table prefix") do |p|
+    options.properties = p
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!(ARGV)
+
+# find the table prefix
+require 'json'
+require 'hash_dot'
+props = JSON.parse(File.read(options.properties)).to_dot
+prefix = props.dynamo.tables["CustomerIngest"].prefix
+
+# delete all the created tables
+@dynamo = Fineo::Aws::Dynamo.new(options.credentials, true)
+@dynamo.delete_tables_with_prefix(prefix)
