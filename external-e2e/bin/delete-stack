@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+#!/usr/bin/env ruby
+# Delete an external api key for e2e testing
+
+# include the "lib" directory
+File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+# include the "common" directory
+File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'optparse'
+require 'ostruct'
+require 'aws/api-gateway'
+
+options = OpenStruct.new()
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options]"
+  opts.separator "Delete a cloudformation stack"
+
+  opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
+    options.credentials = s
+  end
+
+  opts.on("--id STACK_NAME", "Unique 'ID' of the stack or the stack name") do |id|
+    options.id = id
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!(ARGV)
+
+require 'aws/cloudformation'
+client = Fineo::Aws::Cloudformation.new(options.credentials, options.verbose)
+
+# create a key
+client.delete_stack(options.id)
