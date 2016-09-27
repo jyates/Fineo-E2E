@@ -15,6 +15,11 @@ j2 = JSON.parse(File.read(file2))
 
 exit 0 if j1 == j2
 
+# maybe we just have a single row. That should validate correctly.
+if j1.is_a?(Array) && j1.size == 1 && j2.is_a?(Hash)
+  exit 0 if j1[0] == j2
+end
+
 # figure out why they are different
 diff = j1.to_a - j2.to_a
 abort("Objects are different! \n First[#{file1}]: \n#{j1}\n Second[#{file2}]:\n#{j2}\n\nDifference:\n#{diff}")
