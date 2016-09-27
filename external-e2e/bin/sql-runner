@@ -70,7 +70,10 @@ end.parse!(ARGV)
 def run_command(cmd, verbose=false)
   puts "Running: '#{cmd}'" if verbose
   output = `#{cmd}`
-  return OpenStruct.new(success: $?.success?, out: output)
+  result = OpenStruct.new(success: $?.success?, out: output)
+  # check to make sure the result is non-zero length.
+  result.success = output.length > 0 if result.success
+  return result
 end
 
 # build the command
