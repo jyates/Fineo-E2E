@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+# Run an SQL command using the specified jar
+
+SLEEP_TIME_SEC = 10
+
+# include the "lib" directory
+File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+# include the "common" directory
+File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
+  $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
+}
+
+require 'optparse'
+require 'ostruct'
+
+options = OpenStruct.new(fields: [], debugging: "")
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename($0)} [options]"
+  opts.separator "Delete a cloudformation stack"
+
+  opts.on("--output FILE", "Location to write the eventual result") do |out|
+    options.out = out
+  end
+
+  opts.on('--jar JAR_FILE', "The classpath to use") do |s|
+    options.cp = s
+  end
+
+  opts.on("--api-key KEY", "Api key to use") do |key|
+    options.key = key
+  end
+
+  opts.on("--url URL", "URL for the read API") do |url|
+    options.url = url
+  end
+
+  opts.on('-c', '--credentials FILE', "Location of the credentials FILE to use.") do |s|
+    options.credentials = s
+  end
+
+  opts.on("--sql QUERY", "Query to make") do |id|
+    options.query = id
+  end
+
+  opts.on("--debug port", "ENABLE java debugging, with an optional port specification") do |d|
+    port = d.nil? ? 5005 : d
+    options.debugging = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=#{port}"
+  end
+
+  opts.on("-v", "--[no-]verbose", "Run verbosely") do |v|
+    options.verbose = v
+  end
+
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+end.parse!(ARGV)
+
+
+def run_command(cmd, verbose=false)
+  puts "Running: '#{cmd}'" if verbose
+  output = `#{cmd}`
+  return OpenStruct.new(success: $?.success?, out: output)
+end
+
+# build the command
+####################
+# basic java bit
+cmd="java #{options.debugging} -jar #{options.cp}"
+
+# add the arguments
+cmd += " --credentials-file #{options.credentials} --api-key #{options.key} --url #{options.url} #{options.query}"
+
+result = OpenStruct.new(success: false)
+iter = 0
+while !result.success && iter < 2
+  if iter > 0
+    puts "Sleeping #{SLEEP_TIME_SEC} sec while we wait for read retry..." if options.verbose
+    sleep SLEEP_TIME_SEC 
+  end
+  result = run_command(cmd, options.verbose)
+  iter += 1
+end
+
+# write out the outcome
+File.write(options.out, result.out)
+exit(result.success)
