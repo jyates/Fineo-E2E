@@ -1,8 +1,6 @@
 #!/usr/bin/env ruby
 # Run an SQL command using the specified jar
 
-SLEEP_TIME_SEC = 10
-
 # include the "lib" directory
 File.expand_path(File.join(__dir__, "..", "lib")).tap {|pwd|
   $LOAD_PATH.unshift(pwd) unless $LOAD_PATH.include?(pwd)
@@ -16,7 +14,7 @@ File.expand_path(File.join(__dir__, "..", "common")).tap {|pwd|
 require 'optparse'
 require 'ostruct'
 
-options = OpenStruct.new(fields: [], debugging: "", retries: 10)
+options = OpenStruct.new(fields: [], debugging: "", retries: 10, wait_time: 30)
 OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options]"
   opts.separator "Delete a cloudformation stack"
@@ -47,6 +45,10 @@ OptionParser.new do |opts|
 
   opts.on("--retries RETRIES", Integer, "Number of retries. Default: #{options.retries}") do |retries|
     options.retries = retries
+  end
+
+  opts.on("--wait-time SECONDS", Integer, "Amount of time to wait between retries. Default: #{options.wait_time}") do |time|
+    options.wait_time = time
   end
 
   opts.on("--debug port", "ENABLE java debugging, with an optional port specification") do |d|
@@ -83,8 +85,8 @@ result = OpenStruct.new(success: false)
 iter = 0
 while !result.success && iter < options.retries
   if iter > 0
-    puts "Sleeping #{SLEEP_TIME_SEC} sec while we wait for read retry..." if options.verbose
-    sleep SLEEP_TIME_SEC 
+    puts "Sleeping #{options.wait_time} sec while we wait for read retry..." if options.verbose
+    sleep options.wait_time
   end
   result = run_command(cmd, options.verbose)
   iter += 1
