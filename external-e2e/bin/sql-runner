@@ -43,6 +43,10 @@ OptionParser.new do |opts|
     options.query = id
   end
 
+  opts.on("--sql-file FILE", "File containing SQL query") do |file|
+    options.sql_file = file
+  end
+
   opts.on("--retries RETRIES", Integer, "Number of retries. Default: #{options.retries}") do |retries|
     options.retries = retries
   end
@@ -82,7 +86,10 @@ end
 cmd="java #{options.debugging} -jar #{options.cp}"
 
 # add the arguments
-cmd += " --credentials-file #{options.credentials} --api-key #{options.key} --url #{options.url} #{options.query}"
+cmd += " --credentials-file #{options.credentials} --api-key #{options.key} --url #{options.url}"
+
+# sql query or file
+cmd +=  options.sql_file ? " --sql #{options.sql_file}" : " #{options.query}"
 
 result = OpenStruct.new(success: false)
 iter = 0
