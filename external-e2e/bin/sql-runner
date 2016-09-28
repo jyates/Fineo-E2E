@@ -71,12 +71,13 @@ OptionParser.new do |opts|
 end.parse!(ARGV)
 
 
-def run_command(cmd, verbose=false)
+def run_command(cmd, out, err, verbose=false)
   puts "Running: '#{cmd}'" if verbose
-  output = `#{cmd}`
-  result = OpenStruct.new(success: $?.success?, out: output)
+  pid = Process.spawn(cmd, out: out, err: err)
+  _, status = Process.wait2(pid)
+  result = OpenStruct.new(success: status.exitstatus, out: File.read(out))
   # check to make sure the result is non-zero length.
-  result.success = output.length > 0 if result.success
+  result.success = result.out.length > 0 if result.success
   return result
 end
 
@@ -93,12 +94,12 @@ cmd +=  options.sql_file ? " --sql #{options.sql_file}" : " #{options.query}"
 
 result = OpenStruct.new(success: false)
 iter = 0
-while !result.success && iter < options.retries
+while !result.success && iter <= options.retries
   if iter > 0
     puts "Sleeping #{options.wait_time} sec while we wait for read retry..." if options.verbose
     sleep options.wait_time
   end
-  result = run_command(cmd, options.verbose)
+  result = run_command(cmd, options.out, "#{options.out}.err", options.verbose)
   iter += 1
 end
 
