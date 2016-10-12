@@ -49,10 +49,10 @@ RSpec.describe E2ERunner, "#start" do
     expect(events).to eq e2e.read_all(ORG_ID, METRIC_NAME, source)
   end
 
-  def schema?
+  def schema?(field_aliases=[])
     {
-      "field1" =>{
-        "aliases" => [],
+      "field1" => {
+        "aliases" => field_aliases,
         "fieldType" => "BOOLEAN"
       }
     }

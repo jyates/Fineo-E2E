@@ -23,14 +23,14 @@ class Schema < BaseComponent
     request = { "orgId" => org}
     schema_run opts, schema_dir, "createOrg", request
 
-    request["metricName"] =  metric
+    request["body"] = {"metricName" => metric}
     schema_run opts, schema_dir, "createMetric", request
 
     fields.each{|key, value|
       # copy the hash values
       toSend = request.merge({})
 
-      toSend["fieldName"] = key
+      toSend["body"]["fieldName"] = key
       # add the remaining fields directly
       toSend.merge!(value)
 
