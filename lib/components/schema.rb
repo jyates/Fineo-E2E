@@ -17,7 +17,7 @@ class Schema < BaseComponent
   end
 
   # use the schema store java to create a schema at a location
-  def create(opts, org, metric, fields)
+  def create(opts, org, metric, field_schemas)
     schema_dir = setup_dir("schema")
 
     request = { "orgId" => org}
@@ -26,13 +26,13 @@ class Schema < BaseComponent
     request["body"] = {"metricName" => metric}
     schema_run opts, schema_dir, "createMetric", request
 
-    fields.each{|key, value|
+    field_schemas.each{|key, value|
       # copy the hash values
       toSend = request.merge({})
 
       toSend["body"]["fieldName"] = key
       # add the remaining fields directly
-      toSend.merge!(value)
+      toSend["body"].merge!(value)
 
       schema_run(opts, schema_dir, "addField", toSend)
     }
