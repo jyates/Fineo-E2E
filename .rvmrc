@@ -19,8 +19,7 @@ environment_id="ruby-2.1.1@fineoe2e"
 # file. This is very fast and efficient compared to running through the entire
 # CLI and selector. If you want feedback on which environment was used then
 # insert the word 'use' after --create as this triggers verbose mode.
-if [[ -d "${rvm_path:-$HOME/.rvm}/environments"
-  && -s "${rvm_path:-$HOME/.rvm}/environments/$environment_id" ]]
+if [[ -d "${rvm_path:-$HOME/.rvm}/environments" && -s "${rvm_path:-$HOME/.rvm}/environments/$environment_id" ]]
 then
   rvm_path=${rvm_path:-$HOME/.rvm}
   \. "${rvm_path:-$HOME/.rvm}/environments/$environment_id"
