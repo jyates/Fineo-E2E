@@ -15,10 +15,6 @@ RSpec.describe E2ERunner, "#start" do
       @e2e.cleanup
     end
 
-     # jesse-test-key API KEY from AWS API Gateway
-    ORG_ID = "pmV5QkC0RG7tHMYVdyvgG8qLgNV79Swh3XIiNsF1"
-    METRIC_NAME = "metric"
-
     it "runs a standalone instance with a row of data", :mode => 'local_standalone' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())

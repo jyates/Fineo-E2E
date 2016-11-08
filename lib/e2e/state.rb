@@ -14,9 +14,8 @@ class E2EState
 
   attr_reader :dynamo, :drill_cluster
 
-  def initialize(dynamo, spark, drill_cluster)
+  def initialize(dynamo, drill_cluster)
     @dynamo = dynamo
-    @spark = spark
     @drill_cluster = drill_cluster
 
     @schema = Schema.new
@@ -41,8 +40,8 @@ class E2EState
   end
 
   # Do the batch processing step from the output file via spark
-  def batch_process
-    @output = @batch.process(base_opts(), @firehose, @spark)
+  def batch_process(spark)
+    @output = @batch.process(base_opts(), @firehose, spark)
   end
 
   def read_dynamo(org, metric, source = nil)

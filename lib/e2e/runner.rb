@@ -78,7 +78,7 @@ class E2ERunner
     @steps << lambda{ |e2e|
       puts
       puts " ----- Running batch processing ------- "
-      e2e.batch_process
+      e2e.batch_process(@spark)
     }
     # ok, we need to use spark
     @spark = Spark.new
@@ -87,6 +87,7 @@ class E2ERunner
   end
 
   def all_steps()
+    puts "  --> Including all processing steps..."
     create_schema
     send_event
     batch_process
@@ -94,14 +95,16 @@ class E2ERunner
 
   def run
     ensure_working_dir
+
+    # ensure that we have some steps to run. Each step adds any additional resources (e.g. spark)
+    all_steps if @steps.empty?
+
     @drill.org!(@org)
     @resources.each{|r|
       r.start unless r.nil?
     }
 
-    e2e = E2EState.new(@dynamo, @spark, @drill)
-
-    all_steps if @steps.empty?
+    e2e = E2EState.new(@dynamo, @drill)
 
     @steps.each{|step|
       step.call(e2e)
