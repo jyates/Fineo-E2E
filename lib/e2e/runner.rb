@@ -58,6 +58,8 @@ class E2ERunner
 
   def create_schema
     @steps << lambda{ |e2e|
+      puts
+      puts " ----- Creating schema ------- "
       e2e.create_schema(@org, @metric, @schema)
     }
     self
@@ -65,6 +67,8 @@ class E2ERunner
 
   def send_event
     @steps << lambda{ |e2e|
+      puts
+      puts " ----- Sending event ------- "
       e2e.send_event(@org, @metric, @events)
     }
     self
@@ -72,6 +76,8 @@ class E2ERunner
 
   def batch_process
     @steps << lambda{ |e2e|
+      puts
+      puts " ----- Running batch processing ------- "
       e2e.batch_process
     }
     # ok, we need to use spark

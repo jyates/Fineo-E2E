@@ -27,6 +27,10 @@ RSpec.describe E2ERunner, "#start" do
       # run a sub-set of steps, so we don't run a spark cluster...hopefully
       state = @e2e.create_schema().send_event().run()
       
+      puts
+      puts "----- Validate table and ensure drill is setup ----"
+      puts
+      expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME, "fineo-local")
       # print the current locations of everything so we can connect
       puts
       puts "--------------------------------------------------------"
@@ -34,26 +38,17 @@ RSpec.describe E2ERunner, "#start" do
       puts "With metrics: #{METRIC_NAME}"
       puts "Local resources:"
       drill = state.drill_cluster
+      puts "SQL:"
       puts "\tReaderator server URL: \n\t\tjdbc:fineo:url=http://#{drill.host?}:#{drill.port?};api_key=#{ORG_ID}"
       puts "\tDrill zookeeper URL: \n\t\tjdbc:drill:zk=#{drill.host?}:2181"
+      puts "Other:"
+      puts "\tDynamo web console: http://#{drill.host?}:8000/shell"
       puts "--------------------------------------------------------"
 
       puts
       puts "Hit any key to terminate the cluster...."
       STDIN.gets
     end
-  end
-
-  def validate(e2e, events, source=nil)
-    puts "Trying to read from dynamo...."
-    expect(events).to eq e2e.read_dynamo(ORG_ID, METRIC_NAME, source)
-
-    puts "Trying to read from parquet files...."
-    expect(events).to eq e2e.read_parquet(ORG_ID, METRIC_NAME, source)
-
-    puts "Trying to read from dynamo && parquet files...."
-    # read from 'both', but really just dynamo b/c we filter out older parquet files
-    expect(events).to eq e2e.read_all(ORG_ID, METRIC_NAME, source)
   end
 
   def schema?(field_aliases=[])
