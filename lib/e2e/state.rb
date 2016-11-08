@@ -12,6 +12,8 @@ require 'util/run'
 
 class E2EState
 
+  attr_reader :dynamo, :drill_cluster
+
   def initialize(dynamo, spark, drill_cluster)
     @dynamo = dynamo
     @spark = spark

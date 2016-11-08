@@ -19,5 +19,6 @@ export DRILL_REMOTE_READ_HOME=${DRILL_REMOTE_READ_HOME:-${current}/../readerator
 # option will be helpful. For instance, to just run the  local tests you would do:
 # ./test.sh --tag mode:local
 
+# Optionally, you could also specify:  "--pattern standalone/* --tag mode:local_standalone" to run a standalone instance
 cd ${current}
 ${current}/bin/rspec --format doc ${current} $@

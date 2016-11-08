@@ -11,8 +11,8 @@ class E2ERunner
 
   def initialize
     @dynamo = Dynamo.new
-    @spark = Spark.new
     @steps = []
+    @resources = [@dynamo]
 
     if File.exist? Params::WORKING_DIR
       out = "tmp-#{Random.new().rand(100000)}"
@@ -28,6 +28,7 @@ class E2ERunner
       when "standalone"
         @drill = DrillResource.new
     end
+    @resources << @drill
   end
 
   def schema!(org, metric, schema)
@@ -73,6 +74,9 @@ class E2ERunner
     @steps << lambda{ |e2e|
       e2e.batch_process
     }
+    # ok, we need to use spark
+    @spark = Spark.new
+    @resources << @spark
     self
   end
 
@@ -85,7 +89,6 @@ class E2ERunner
   def run
     ensure_working_dir
     @drill.org!(@org)
-    @resources = [@dynamo, @spark, @drill]
     @resources.each{|r|
       r.start unless r.nil?
     }
