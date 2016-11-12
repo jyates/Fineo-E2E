@@ -70,6 +70,25 @@ RSpec.describe E2ERunner, "#e2e_testing" do
         info_table("VIEWS"),
         table_row("FINEO", METRIC_NAME)
         ]).to eq state.drill_sql(ORG_ID, "SELECT * from INFORMATION_SCHEMA.`TABLES`")
+
+      # columns
+      expect([{
+        "TABLE_CATALOG" => "FINEO",
+        "TABLE_SCHEMA" => "FINEO",
+        "TABLE_NAME" => METRIC_NAME,
+        "COLUMN_NAME" => "timestamp",
+        "ORDINAL_POSITION" => 1,
+        "DATA_TYPE" => "BIGINT"
+      },{
+        "TABLE_CATALOG" => "FINEO",
+        "TABLE_SCHEMA" => "FINEO",
+        "TABLE_NAME" => METRIC_NAME,
+        "COLUMN_NAME" => "field1",
+        "ORDINAL_POSITION" => 2,
+        "DATA_TYPE" => "BOOLEAN"
+      }]).to eq state.drill_sql(ORG_ID, "SELECT " +
+        "TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE" +
+        " FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME like '#{METRIC_NAME}'")
     end
   end
 
