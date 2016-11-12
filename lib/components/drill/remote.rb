@@ -16,6 +16,10 @@ class DrillRemote
     @read = Standalone.new(HOME, cluster, source)
   end
 
+  def getTableName(org, metric)
+    return metric
+  end
+
   def read_internal(context)
     # run the job
     @bootstrap.exec(context)

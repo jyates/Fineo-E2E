@@ -13,6 +13,10 @@ class DrillLocal < BaseComponent
     @source = source
   end
 
+  def getTableName(org, metric)
+    return "fineo.#{org}.#{metric}"
+  end
+
   def read_internal(context)
     java(aws_jars(), DRILL, context.opts, "local")
   end

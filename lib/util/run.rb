@@ -6,10 +6,11 @@ module Run
 
   LOG = ">> tmp/out.log 2>> tmp/error.log"
 
-  def self.enableDebugging(port=5005)
+  def self.enableDebugging(port=5005, suspend="y")
     ENV['DEBUG'] = "1"
     ENV['DISABLE_DEBUG_AFTER'] = "1"
     ENV['DEBUG_PORT']=port.to_s
+    ENV["DEBUG_SUSPEND"]=suspend
   end
 
   def run(command, log=true)
@@ -33,8 +34,9 @@ module Run
 
     unless Params.env('DEBUG', '').empty?
       port = Params.env('DEBUG_PORT', 5005)
-      puts " ------- Please connect to remote JVM at: #{port} -------- "
-      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=y,address=#{port} "
+      suspend = ENV["DEBUG_SUSPEND"]
+      puts " ------- Please connect to remote JVM at: #{port} (suspend: #{suspend})-------- "
+      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=#{suspend},address=#{port} "
       ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
     end
 

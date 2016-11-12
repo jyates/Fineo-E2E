@@ -18,10 +18,15 @@ module DrillComponent
   end
 
   def read(org, metric)
-    opts = @context.opts
-    opts["--org"] = org
-    opts["--metric"] = metric
+    return read_sql(org, "SELECT * from #{getTableName(org, metric)} ORDER BY `timestamp` ASC")
+  end
 
+  def read_sql(org, sql)
+    opts = @context.opts
+    sql_file = "#{@file}.query"
+    File.write(sql_file, sql)
+    opts["--sql"] = sql_file
+    opts["--org"] = org
     read_internal(@context)
     @file
   end

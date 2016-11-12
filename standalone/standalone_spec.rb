@@ -15,6 +15,9 @@ RSpec.describe E2ERunner, "#start" do
       @e2e.cleanup
     end
 
+    ORG_ID = "pmV5"
+    METRIC_NAME = "metric1"
+
     it "runs a standalone instance with a row of data", :mode => 'local_standalone' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
@@ -26,7 +29,7 @@ RSpec.describe E2ERunner, "#start" do
       puts
       puts "----- Validate table and ensure drill is setup ----"
       puts
-      expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME, "fineo-local")
+      expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME)
       # print the current locations of everything so we can connect
       puts
       puts "--------------------------------------------------------"

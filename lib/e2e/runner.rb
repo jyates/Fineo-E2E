@@ -26,8 +26,10 @@ class E2ERunner
       when "local"
         @drill = BaseDrill.new
       when "standalone"
+        mode = "fineo-local"
         @drill = DrillResource.new
     end
+    @drill_mode = mode
     @resources << @drill
   end
 
@@ -104,7 +106,7 @@ class E2ERunner
       r.start unless r.nil?
     }
 
-    e2e = E2EState.new(@dynamo, @drill)
+    e2e = E2EState.new(@dynamo, @drill, @drill_mode)
 
     @steps.each{|step|
       step.call(e2e)

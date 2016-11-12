@@ -14,9 +14,10 @@ class E2EState
 
   attr_reader :dynamo, :drill_cluster
 
-  def initialize(dynamo, drill_cluster)
+  def initialize(dynamo, drill_cluster, drill_mode)
     @dynamo = dynamo
     @drill_cluster = drill_cluster
+    @drill_mode = drill_mode
 
     @schema = Schema.new
     @ingest = Ingest.new
@@ -44,22 +45,31 @@ class E2EState
     @output = @batch.process(base_opts(), @firehose, spark)
   end
 
-  def read_dynamo(org, metric, source = nil)
-    read_drill(Drill::DYNAMO, org, metric, source)
+  def read_dynamo(org, metric)
+    read_drill(Drill::DYNAMO, org, metric)
   end
 
-  def read_parquet(org, metric, source = nil)
-    read_drill(Drill::PARQUET, org, metric, source)
+  def read_parquet(org, metric)
+    read_drill(Drill::PARQUET, org, metric)
   end
 
-  def read_all(org, metric, source = nil)
-    read_drill(Drill::BOTH, org, metric, source)
+  def read_all(org, metric)
+    read_drill(Drill::BOTH, org, metric)
+  end
+
+  def drill_sql(org, sql)
+    read = Drill.from(@drill_cluster, @drill_mode)
+      .with(Drill::DYNAMO, base_opts(), @output, @ingest.store_prefix)
+      .read_sql(org, sql)
+    # read the data
+    file = File.read(read)
+    JSON.parse(file)
   end
 
 private
 
-  def read_drill(mode, org, metric, source)
-    read = Drill.from(@drill_cluster, source)
+  def read_drill(mode, org, metric)
+    read = Drill.from(@drill_cluster, @drill_mode)
       .with(mode, base_opts(), @output, @ingest.store_prefix)
       .read(org, metric)
     # read the data
