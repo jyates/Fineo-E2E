@@ -22,7 +22,7 @@ module Drill
 
   def self.from(cluster, source=nil)
     case source
-    when nil
+    when nil,"local"
       DrillLocal.new(source)
     when "avatica", "fineo-local", "fineo-aws"
       DrillRemote.new(cluster, source)
