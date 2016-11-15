@@ -7,8 +7,7 @@ class Fineo::Aws::ApiGateway
   def initialize(credentials, verbose)
     @verbose = verbose
     creds = Fineo::Aws::Credentials.load(credentials)
-    @client = Aws::APIGateway::Client.new(access_key_id: creds['access_key_id'],
-                                secret_access_key: creds['secret_access_key'],
+    @client = Aws::APIGateway::Client.new(credentials: creds,
                                 validate_params: true,
                                 log_level: :debug)
     @id = Random.new().rand(1000000)

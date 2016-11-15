@@ -8,8 +8,7 @@ class Fineo::Aws::Cloudformation
     @verbose = verbose
     creds = Fineo::Aws::Credentials.load(credentials)
     info = {
-      access_key_id: creds['access_key_id'],
-      secret_access_key: creds['secret_access_key'],
+      credentials: creds,
       validate_params: true,
       log_level: :debug
     }
