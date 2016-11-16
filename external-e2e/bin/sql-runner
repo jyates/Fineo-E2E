@@ -39,6 +39,10 @@ OptionParser.new do |opts|
     options.credentials = s
   end
 
+  opts.on('--credentials-file FILE', "Location of the credentials FILE to use.") do |s|
+    options.credentials = s
+  end
+
   opts.on("--sql QUERY", "Query to make") do |id|
     options.query = id
   end
