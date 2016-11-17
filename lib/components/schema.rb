@@ -20,25 +20,39 @@ class Schema < BaseComponent
   def create(opts, org, metric, field_schemas)
     schema_dir = setup_dir("schema")
 
-    request = { "orgId" => org}
-    schema_run opts, schema_dir, "createOrg", request
+    request = create_request(org, metric)
+    schema_run(opts, schema_dir, "createOrg", request)
 
-    request["body"] = {"metricName" => metric}
-    schema_run opts, schema_dir, "createMetric", request
+    request = create_request(org, metric, true)
+    schema_run(opts, schema_dir, "createMetric", request)
 
     field_schemas.each{|key, value|
-      # copy the hash values
-      toSend = request.merge({})
+      create_field_internal(opts, request.merge({}), key, value)
+    }
+  end
 
-      toSend["body"]["fieldName"] = key
-      # add the remaining fields directly
-      toSend["body"].merge!(value)
-
-      schema_run(opts, schema_dir, "addField", toSend)
+  def create_fields(opts, org, metric, field_hash)
+    request = create_request(org, metric, true)
+    field_hash.each{|key, value|
+      create_field_internal(opts, request.merge({}), key, value)
     }
   end
 
 private
+
+  def create_request(org, metric, body=false)
+    request = { "orgId" => org}
+    request["body"] = {"metricName" => metric} if body
+    return request
+  end
+
+  def create_field_internal(opts, request, name, type_info)
+    schema_dir = setup_dir("schema")
+    request["body"]["fieldName"] = name
+    request["body"].merge!(type_info)
+    schema_run(opts, schema_dir, "addField", request)
+  end
+
   # Run the schema update
     def schema_run(opts, dir, cmd, request)
       dir = File.absolute_path(dir)

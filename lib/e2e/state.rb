@@ -36,6 +36,10 @@ class E2EState
     @schema.create(base_opts(), org, metric, schema)
   end
 
+  def create_fields(org, metric, fields)
+    @schema.create_fields(base_opts(), org, metric, fields)
+  end
+
   def send_event(org, metric, event)
     @firehose = @ingest.send(base_opts(), org, metric, event)
   end
