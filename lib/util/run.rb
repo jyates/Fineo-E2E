@@ -13,7 +13,7 @@ module Run
     ENV["DEBUG_SUSPEND"]=suspend
   end
 
-  def run(command, log=true)
+  def run(command, log=false)
      puts "Running: #{command}" if log
      `#{command}`
      raise "FAILED: '#{command}'" unless $? == 0

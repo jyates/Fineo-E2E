@@ -6,6 +6,7 @@ require 'resources/dynamo'
 require 'resources/spark'
 require 'resources/drill'
 require 'resources/drill/base'
+require 'pp'
 
 class E2ERunner
 
@@ -62,6 +63,7 @@ class E2ERunner
     @steps << lambda{ |e2e|
       puts
       puts " ----- Creating schema ------- "
+      pp @schema
       e2e.create_schema(@org, @metric, @schema)
     }
     self
@@ -70,7 +72,8 @@ class E2ERunner
   def send_event
     @steps << lambda{ |e2e|
       puts
-      puts " ----- Sending event ------- "
+      puts " ----- Sending event(s) ------- "
+      pp @events
       e2e.send_event(@org, @metric, @events)
     }
     self

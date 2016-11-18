@@ -20,10 +20,10 @@ class DrillRemote
     return metric
   end
 
-  def read_internal(context)
+  def read_internal(context, log=false)
     # run the job
     @bootstrap.exec(context)
-    puts "   Waiting a litte bit in hopes that read will work more often..."
+    puts "   Waiting a litte bit in hopes that read will work more often..." if log
     sleep(5)
     @read.exec(context)
   end
