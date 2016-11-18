@@ -14,6 +14,26 @@ require 'optparse'
 require 'ostruct'
 require 'aws/credentials'
 
+def find_api_id(stack)
+  begin
+    value = stack.resource_summaries.each{|resource|
+      id = resource.logical_id
+      sr = stack.resource(id)
+      # assume only 1 RestApi per stack
+      next unless sr.resource_type == "AWS::ApiGateway::RestApi"
+
+      # found the id - output that
+      break sr.physical_resource_id
+    }
+    raise "No API found for stack: #{options.name}" if value.nil?
+    return value
+  rescue Aws::CloudFormation::Errors::Throttling
+    # Asked too many times, try again
+    sleep(5)
+    return find_api_id(stack)
+  end
+end
+
 options = OpenStruct.new
 OptionParser.new do |opts|
   opts.banner = "Usage: #{File.basename($0)} [options]"
@@ -41,22 +61,5 @@ info = {
 }
 resource = Aws::CloudFormation::Resource.new(info)
 cloudformation =  Aws::CloudFormation::Client.new(info)
-
-stack = resource.stack(options.name)
-found = false
-begin
-  stack.resource_summaries.each{|resource|
-    id = resource.logical_id
-    sr = stack.resource(id)
-    # assume only 1 RestApi per stack
-    next unless sr.resource_type == "AWS::ApiGateway::RestApi"
-
-    # found the id - output that
-    puts sr.physical_resource_id
-    found = true
-    break
-  }
-rescue StopIteration
-end
-
-raise "No API found for stack: #{options.name}" unless found
+id = find_api_id(resource.stack(options.name))
+puts "#{id}"
