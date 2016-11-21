@@ -21,14 +21,19 @@ RSpec.describe E2ERunner, "#start" do
     it "runs a standalone instance with a row of data", :mode => 'local_standalone' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
-      event = @e2e.event!(event?())
+      raw_event = event?()
+      raw_event["field2"] = "hello"
+      event = @e2e.event!(raw_event)
       
       # run a sub-set of steps, so we don't run a spark cluster...hopefully
       state = @e2e.create_schema().send_event().run()
       
       puts
-      puts "----- Validate table and ensure drill is setup ----"
+      # e.g. setup drill and validate that the data is present
+      puts "----- Setting up Read Server ----"
       puts
+      # initial read will not have field2 - its not in the schema
+      event.delete("field2")
       expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME)
       # print the current locations of everything so we can connect
       puts
@@ -43,6 +48,22 @@ RSpec.describe E2ERunner, "#start" do
       puts "Other:"
       puts "\tDynamo web console: http://#{drill.host?}:8000/shell"
       puts "--------------------------------------------------------"
+
+      puts
+      puts "Hit any key to continue...."
+      STDIN.gets
+
+      puts
+      puts "Updating the schema to include 'field2' as a VARCHAR"
+      # add field2 to the schema
+      state.create_fields(ORG_ID, METRIC_NAME, {
+        "field2" => {
+          "aliases" => [],
+          "fieldType" => "VARCHAR"
+        }
+      })
+      event["field2"] = "hello"
+      expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME)
 
       puts
       puts "Hit any key to terminate the cluster...."
