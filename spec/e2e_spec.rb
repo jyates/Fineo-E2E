@@ -36,7 +36,7 @@ RSpec.describe E2ERunner, "#e2e_testing" do
       validate(state, [event])
     end
 
-    it "ingests a data wihtout a schema, but then can read it when we apply schema", :mode => 'evolve_schema' do
+    it "ingests a data without a schema, but then can read it when we apply schema", :mode => 'evolve_schema' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
 
