@@ -36,7 +36,7 @@ RSpec.describe E2ERunner, "#e2e_testing" do
       validate(state, [event])
     end
 
-    it "ingests a data without a schema, but then can read it when we apply schema", :mode => 'evolve_schema' do
+    it "ingests a data without a schema, but then can read it when we apply schema", :mode => 'evolve_schema_varchar' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
 
@@ -61,6 +61,34 @@ RSpec.describe E2ERunner, "#e2e_testing" do
       # now we should be able to read the field
       event["field2"] = "world"
       expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME)
+    end
+
+    it "ingests a data without a schema, but then can read it when we apply schema", :mode => 'evolve_schema_number' do
+      @e2e.drill!("standalone")
+      @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
+
+      raw_event = event?()
+      raw_event["field2"] = "1"
+      event = @e2e.event!(raw_event)
+      # just do dynamo for right now.
+      state = @e2e.create_schema().send_event().run()
+
+      # initial read will not have field2 - its not in the schema
+      event.delete("field2")
+      expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME)
+
+      # add field2 to the schema
+      state.create_fields(ORG_ID, METRIC_NAME, {
+        "field2" => {
+          "aliases" => [],
+          "fieldType" => "INTEGER"
+        }
+      })
+
+      # now we should be able to read the field
+      event["field2"] = 1
+      expect([event]).to eq state.read_dynamo(ORG_ID, METRIC_NAME)
+      puts " --- read field successfully --"
     end
 
     it "has the correct JDBC info for the user", :mode => 'jdbc' do
