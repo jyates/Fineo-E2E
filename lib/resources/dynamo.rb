@@ -14,6 +14,7 @@ class Dynamo < Resource
   end
 
   def start
+    return if @started
     unpack
 
     @port = Params.env('DYNAMO_PORT', '8000')

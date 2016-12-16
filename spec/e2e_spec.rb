@@ -91,6 +91,37 @@ RSpec.describe E2ERunner, "#e2e_testing" do
       puts " --- read field successfully --"
     end
 
+    it "evolves schema for an alias field", :mode => 'alias' do
+      @e2e.drill!("standalone")
+      schema = schema?()
+      schema["field2"] = {
+          "aliases" => ["f2"],
+          "fieldType" => "INTEGER"
+      }
+      @e2e.schema!(ORG_ID, METRIC_NAME, schema)
+
+      raw_event = event?()
+
+      raw_event2 = raw_event.clone
+      raw_event2["field2"] = 1
+      raw_event2["timestamp"] = raw_event["timestamp"] +1
+
+      raw_event3 = raw_event2.clone
+      raw_event3.delete("field2")
+      raw_event3["f2"] = 2
+      raw_event3["timestamp"] = raw_event2["timestamp"] +1
+
+      events = @e2e.events!([raw_event, raw_event2, raw_event3])
+      # #startup - skip validation b/c there is something wrong with how we read data from dynamo. still comes out fine in drill reads, so w/e
+      state = @e2e.create_schema().send_event().skip_ingest_validation().run()
+
+      # validate reading (with corrections for schema resolution on read)
+      events[0]["field2"] = nil
+      events[2]["field2"] = events[2].delete("f2")
+      expect(state.read_dynamo(ORG_ID, METRIC_NAME)).to eq events
+    end
+
+
     it "has the correct JDBC info for the user", :mode => 'jdbc' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
@@ -145,6 +176,13 @@ RSpec.describe E2ERunner, "#e2e_testing" do
         "TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE" +
         " FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME like '#{METRIC_NAME}'")
     end
+  end
+
+  def send_event(e2e, state, event)
+    e2e.clear_steps()
+    expected_event = e2e.event!(event)
+    e2e.send_event().run(state)
+    return expected_event
   end
 
   def info_table(name)

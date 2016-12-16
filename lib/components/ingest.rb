@@ -12,11 +12,20 @@ class Ingest < BaseComponent
   def initialize
     super('INGEST_WRITE_HOME')
     @store_prefix = "ingest-e2e_test-#{Random.rand(100000)}"
+    @validate = true
+  end
+
+  def skip_validation()
+    @validate = false
   end
 
   def send(options, org_id, user_metric_name, events)
     file_dir = setup_dir("events")
     file = JsonHelper.write(file_dir, "event", events)
+    unless @validate
+      options["--skip-validation"] = ""
+    end
+
     options["--json"] = File.absolute_path(file)
 
     options["--ingest-table-prefix"] = @store_prefix

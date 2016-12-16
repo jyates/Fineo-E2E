@@ -3,6 +3,8 @@ require 'util/params'
 
 class Resource
 
+  attr_accessor :started
+
   def initialize(source, name)
     @name = name
     @source =  File.join((Params.env_require 'EXT_HOME'), "#{source}")

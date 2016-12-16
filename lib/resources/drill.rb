@@ -14,8 +14,10 @@ class DrillResource < BaseDrill
   end
 
   def start
+    return if @started
     zookeeper = @cluster.start
     @server.start(zookeeper, @org)
+    @started = true
   end
 
   def host?
@@ -27,6 +29,7 @@ class DrillResource < BaseDrill
   end
 
   def stop
+    return unless @started
     @cluster.stop
     @server.stop
   end

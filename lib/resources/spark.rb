@@ -39,6 +39,7 @@ class Spark < Resource
   end
 
   def start
+    return if @started
     unpack
     # start the cluster
     @dir = "#{@working}/spark-1.6.2-bin-hadoop2.6"

@@ -14,13 +14,14 @@ class E2EState
 
   attr_reader :dynamo, :drill_cluster
 
-  def initialize(dynamo, drill_cluster, drill_mode)
+  def initialize(dynamo, drill_cluster, drill_mode, skip_ingest_validation = false)
     @dynamo = dynamo
     @drill_cluster = drill_cluster
     @drill_mode = drill_mode
 
     @schema = Schema.new
     @ingest = Ingest.new
+    @ingest.skip_validation if skip_ingest_validation
     @batch = Batch.new
   end
 

@@ -61,7 +61,6 @@ class E2ERunner
 
   def create_schema
     @steps << lambda{ |e2e|
-      puts
       puts " ----- Creating schema ------- "
       pp @schema
       e2e.create_schema(@org, @metric, @schema)
@@ -71,7 +70,6 @@ class E2ERunner
 
   def send_event
     @steps << lambda{ |e2e|
-      puts
       puts " ----- Sending event(s) ------- "
       pp @events
       e2e.send_event(@org, @metric, @events)
@@ -81,7 +79,6 @@ class E2ERunner
 
   def batch_process
     @steps << lambda{ |e2e|
-      puts
       puts " ----- Running batch processing ------- "
       e2e.batch_process(@spark)
     }
@@ -98,21 +95,36 @@ class E2ERunner
     batch_process
   end
 
-  def run
+  def skip_ingest_validation()
+    @skip_ingest_validation = true
+    self
+  end
+
+  def clear_steps()
+    @steps.clear()
+  end
+
+  def run(runner = nil)
     ensure_working_dir
 
     # ensure that we have some steps to run. Each step adds any additional resources (e.g. spark)
     all_steps if @steps.empty?
 
-    @drill.org!(@org)
-    @resources.each{|r|
-      r.start unless r.nil?
-    }
-
-    e2e = E2EState.new(@dynamo, @drill, @drill_mode)
+    if runner.nil?
+      @drill.org!(@org)
+      @resources.each{|r|
+        r.start unless r.nil?
+      }
+      e2e = E2EState.new(@dynamo, @drill, @drill_mode, @skip_ingest_validation)
+    else
+      e2e = runner
+    end
 
     @steps.each{|step|
+      puts
+      puts "`` Started #{Time.now}"
       step.call(e2e)
+      puts "^^ Done #{Time.now}"
     }
 
     e2e
