@@ -29,6 +29,14 @@ module Run
     return result
   end
 
+  # Build a java command to run
+  # java -cp {clazz} {args_hash} {cmd} {cmd_opts}
+  # Params:
+  # +jars_list+:: list of jars to use in the classpath
+  # +clazz+:: class name when building the command
+  # +args_hash+:: hash of key:value arguments to use before the command
+  # +cmd+:: logical command to run
+  # +cmd_opts+:: hash of key:value arguments to use after the command
   def build_java_command(jars_list, clazz, args_hash, cmd, cmd_opts={})
     command = "java "
 
@@ -43,6 +51,42 @@ module Run
     jars = jars_list.join(':')
     raise "No jars found for class: #{clazz}!" if jars.empty?
     command << "-cp #{jars} "
+
+    command << "#{clazz} "
+
+    args = Command.spaces(args_hash)
+    command << "#{args} "
+
+    cmd.concat " #{Command.spaces(cmd_opts)}" unless cmd_opts.empty?
+    command << "#{cmd}"
+  end
+
+  # Build a java command to run
+  # java {dashDprops} -jar {jar} {clazz} {args_hash} {cmd} {cmd_opts}
+  # Params:
+  # +dashDprops+:: hash of properties that will be joined like -D{hash}={value}
+  # +jar+:: jar to use when running the command
+  # +clazz+:: class name when building the command
+  # +args_hash+:: hash of key:value arguments to use before the command
+  # +cmd+:: logical command to run
+  # +cmd_opts+:: hash of key:value arguments to use after the command
+  def build_java_jar_command(jar, dashDProps, clazz, args_hash, cmd, cmd_opts={})
+    command = "java "
+
+    unless Params.env('DEBUG', '').empty?
+      port = Params.env('DEBUG_PORT', 5005)
+      suspend = ENV["DEBUG_SUSPEND"]
+      puts " ------- Please connect to remote JVM at: #{port} (suspend: #{suspend})-------- "
+      command << "-Xdebug -Xrunjdwp:server=y,transport=dt_socket,suspend=#{suspend},address=#{port} "
+      ENV['DEBUG'] = nil if !(ENV['DISABLE_DEBUG_AFTER'].nil?)
+    end
+
+    command << "-jar #{jar} "
+
+    command << "#{clazz} "
+
+    dashD = Command.dashD(dashDProps)
+    command << "#{dashD} "
 
     command << "#{clazz} "
 

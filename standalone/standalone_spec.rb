@@ -43,6 +43,7 @@ RSpec.describe E2ERunner, "#start" do
       puts "Local resources:"
       drill = state.drill_cluster
       puts "SQL:"
+      puts "\Proxy server URL: \n\t\thttp://#{drill.proxy_host?}:#{drill.proxy_port?}"
       puts "\tReaderator server URL: \n\t\tjdbc:fineo:url=http://#{drill.host?}:#{drill.port?};api_key=#{ORG_ID}"
       puts "\tDrill zookeeper URL: \n\t\tjdbc:drill:zk=#{drill.host?}:2181"
       puts "Other:"

@@ -121,7 +121,6 @@ RSpec.describe E2ERunner, "#e2e_testing" do
       expect(state.read_dynamo(ORG_ID, METRIC_NAME)).to eq events
     end
 
-
     it "has the correct JDBC info for the user", :mode => 'jdbc' do
       @e2e.drill!("standalone")
       @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
@@ -175,6 +174,33 @@ RSpec.describe E2ERunner, "#e2e_testing" do
       }]).to eq state.drill_sql(ORG_ID, "SELECT " +
         "TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, ORDINAL_POSITION, DATA_TYPE" +
         " FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME like '#{METRIC_NAME}'")
+    end
+
+    it "allows select * from (values(1))", :mode => 'select_values' do
+      @e2e.drill!("standalone")
+      @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
+      event = @e2e.event!(event?())
+      @e2e.skip_batch_process_for_testing!
+      state = @e2e.run
+      expect([{
+        "EXPR$0" => 1
+       }]).to eq state.drill_sql(ORG_ID, "select * from (values(1))")
+    end
+
+    it "has a working proxy server", :mode => 'proxy' do
+      @e2e.drill!("standalone")
+      @e2e.schema!(ORG_ID, METRIC_NAME, schema?())
+      event = @e2e.event!(event?())
+      @e2e.skip_batch_process_for_testing!
+      state = @e2e.run
+
+      # generic select values
+      expect([{
+        "EXPR$0" => 1
+       }]).to eq state.proxy_drill_sql(ORG_ID, "select * from (values(1))")
+
+      # reading an actual event
+      expect([event]).to eq state.proxy_drill_sql(ORG_ID, "select * from #{METRIC_NAME}")
     end
   end
 

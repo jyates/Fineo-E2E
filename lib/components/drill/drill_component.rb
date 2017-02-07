@@ -30,4 +30,37 @@ module DrillComponent
     read_internal(@context)
     @file
   end
+
+  # Much simpler implementation of reading from the cluster that goes through the simple query
+  #'proxy'. Has to first bootstrap the cluster to include the expected tables, then makes a
+  # simple http request and translates the results from JSON
+  def read_proxy_sql(org, sql)
+    raise "#{self.class} does not support proxy reads!" unless @supports_proxy
+
+    opts = @context.opts
+    opts["--org"] = org
+    bootstrap(@context)
+
+    require 'net/http'
+    uri = URI("http://#{@cluster.proxy_host?}:#{@cluster.proxy_port?}/query")
+    params = {
+      :request => sql,
+      :apikey => org
+    }
+    uri.query = URI.encode_www_form(params)
+
+    # Save the query
+    query = "#{@file}.query"
+    # random name so we don't clobber previous queries
+    query = "#{query}-#{Random.new().rand(100000)}" if File.exists? query
+    File.write(query, "Running query: #{uri}\n")
+
+    # Make the request
+    res = Net::HTTP.get_response(uri)
+    unless res.is_a?(Net::HTTPSuccess)
+      raise "Failed HTTP request! #{res}"
+    end
+
+    return JSON.parse(res.body)
+  end
 end

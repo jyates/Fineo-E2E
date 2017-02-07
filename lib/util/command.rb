@@ -7,4 +7,11 @@ module Command
         "#{k} #{v}"
      }.join(" ")
   end
+
+  def self.dashD(args_hash)
+     args_hash.map{|k,v|
+        k if v.nil?
+        "-D#{k}=#{v}"
+     }.join(" ")
+  end
 end
