@@ -44,19 +44,23 @@ module DrillComponent
     require 'net/http'
     uri = URI("http://#{@cluster.proxy_host?}:#{@cluster.proxy_port?}/query")
     params = {
-      :request => sql,
-      :apikey => org
+      :request => sql
     }
     uri.query = URI.encode_www_form(params)
+
+    # set the headers
+    req = Net::HTTP::Get.new(uri)
+    req['x-api-key'] = org
 
     # Save the query
     query = "#{@file}.query"
     # random name so we don't clobber previous queries
     query = "#{query}-#{Random.new().rand(100000)}" if File.exists? query
     File.write(query, "Running query: #{uri}\n")
-
-    # Make the request
-    res = Net::HTTP.get_response(uri)
+  
+    res = Net::HTTP.start(uri.hostname, uri.port) { |http|
+      http.request(req)
+    }
     unless res.is_a?(Net::HTTPSuccess)
       raise "Failed HTTP request! #{res}"
     end
