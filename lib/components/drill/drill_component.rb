@@ -48,22 +48,19 @@ module DrillComponent
     }
     uri.query = URI.encode_www_form(params)
 
-    # set the headers
-    req = Net::HTTP::Get.new(uri)
-    req['x-api-key'] = org
-
     # Save the query
     query = "#{@file}.query"
     # random name so we don't clobber previous queries
     query = "#{query}-#{Random.new().rand(100000)}" if File.exists? query
-    File.write(query, "Running query: #{uri}\n")
+    File.write(query, "Running query: #{sql} against #{uri}\n")
+
+    # set the headers
+    http = Net::HTTP.new(uri.host,uri.port)
+    req = Net::HTTP::Post.new(uri.path, initheader = {'Content-Type' =>'application/json', 'x-api-key' => org})
+    req.body = sql
   
-    res = Net::HTTP.start(uri.hostname, uri.port) { |http|
-      http.request(req)
-    }
-    unless res.is_a?(Net::HTTPSuccess)
-      raise "Failed HTTP request! #{res}"
-    end
+    res = http.request(req)
+    raise "Failed HTTP request! #{res}" unless res.is_a?(Net::HTTPSuccess)
 
     return JSON.parse(res.body)
   end
