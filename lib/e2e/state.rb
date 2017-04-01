@@ -71,10 +71,10 @@ class E2EState
     JSON.parse(file)
   end
 
-  def proxy_drill_sql(org, sql)
+  def proxy_drill_sql(org, sql, fail_on_error_response=true)
     Drill.from(@drill_cluster, @drill_mode)
       .with(Drill::DYNAMO, base_opts(), @output, @ingest.store_prefix)
-      .read_proxy_sql(org, sql)
+      .read_proxy_sql(org, sql, fail_on_error_response)
   end
 
 private

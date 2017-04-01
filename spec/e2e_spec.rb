@@ -201,6 +201,13 @@ RSpec.describe E2ERunner, "#e2e_testing" do
 
       # reading an actual event
       expect([event]).to eq state.proxy_drill_sql(ORG_ID, "select * from #{METRIC_NAME}")
+
+      # ensure that bad queries generate a 'good' response format
+      response = state.proxy_drill_sql(ORG_ID, "select bad_request", false)
+      expect(response).to be_instance_of(Net::HTTPBadRequest)
+      body = JSON.parse(response.body)
+      expect(body['code']).to eq 400
+      expect(body['message']).to start_with "Error -1 (00000) : Error while executing SQL"
     end
   end
 

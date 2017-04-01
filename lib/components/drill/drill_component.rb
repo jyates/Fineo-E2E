@@ -34,7 +34,7 @@ module DrillComponent
   # Much simpler implementation of reading from the cluster that goes through the simple query
   #'proxy'. Has to first bootstrap the cluster to include the expected tables, then makes a
   # simple http request and translates the results from JSON
-  def read_proxy_sql(org, sql)
+  def read_proxy_sql(org, sql, fail_on_error_response)
     raise "#{self.class} does not support proxy reads!" unless @supports_proxy
 
     opts = @context.opts
@@ -60,8 +60,8 @@ module DrillComponent
     req.body = sql
   
     res = http.request(req)
-    raise "Failed HTTP request! #{res}" unless res.is_a?(Net::HTTPSuccess)
+    raise "Failed HTTP request! #{res}" if !res.is_a?(Net::HTTPSuccess) && fail_on_error_response
 
-    return JSON.parse(res.body)
+    return fail_on_error_response ?  JSON.parse(res.body) : res
   end
 end
