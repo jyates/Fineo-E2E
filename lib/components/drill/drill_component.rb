@@ -43,10 +43,6 @@ module DrillComponent
 
     require 'net/http'
     uri = URI("http://#{@cluster.proxy_host?}:#{@cluster.proxy_port?}/query")
-    params = {
-      :request => sql
-    }
-    uri.query = URI.encode_www_form(params)
 
     # Save the query
     query = "#{@file}.query"
@@ -57,10 +53,11 @@ module DrillComponent
     # set the headers
     http = Net::HTTP.new(uri.host,uri.port)
     req = Net::HTTP::Post.new(uri.path, initheader = {'Content-Type' =>'application/json', 'x-api-key' => org})
-    req.body = sql
+    require 'json'
+    req.body = {sql: sql}.to_json
   
     res = http.request(req)
-    raise "Failed HTTP request! #{res}" if !res.is_a?(Net::HTTPSuccess) && fail_on_error_response
+    raise "Failed HTTP request! #{res.code} #{res.message} #{res.body}" if !res.is_a?(Net::HTTPSuccess) && fail_on_error_response
 
     return fail_on_error_response ?  JSON.parse(res.body) : res
   end
